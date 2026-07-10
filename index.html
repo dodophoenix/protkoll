@@ -165,6 +165,7 @@
     text-overflow:ellipsis;
   }
   .chevron{ color:var(--ink-faint); font-size:13px; transition:transform .2s ease; flex-shrink:0;}
+  .icon-btn{ border:none; background:none; font-size:17px; padding:4px 3px; cursor:pointer; flex-shrink:0; line-height:1; }
   .entry-card.open .chevron{ transform:rotate(90deg); }
   .entry-body{ display:none; padding:0 14px 14px; }
   .entry-card.open .entry-body{ display:block; }
@@ -258,6 +259,7 @@
   .cat-select label.symptom.checked{ border-color:var(--symptom); background:var(--symptom-bg); color:var(--symptom); }
   .cat-select label.arztbesuch.checked{ border-color:var(--arzt); background:var(--arzt-bg); color:var(--arzt); }
   .cat-select label.diagnostik.checked{ border-color:var(--diag); background:var(--diag-bg); color:var(--diag); }
+  .cat-select label.checked{ border-color:var(--accent); background:rgba(47,107,94,0.08); color:var(--accent); }
   .hint{ font-size:11.5px; color:var(--ink-faint); margin-top:5px; }
 
   /* ---- Data / backup card ---- */
@@ -273,37 +275,39 @@
 
   /* ---- Print view ---- */
   #printArea{ display:none; }
-  .print-doc{ font-family:var(--font-display); color:#111; }
-  .print-doc h1{ font-size:21px; margin:0 0 2px; }
-  .print-doc .meta{ font-size:11px; color:#444; font-family:var(--font-body); margin-bottom:14px; }
-  table.print-stats{ width:100%; border-collapse:collapse; margin-bottom:18px; table-layout:fixed; }
-  table.print-stats td{ border:1px solid #bbb; padding:7px 6px; font-size:10.5px; font-family:var(--font-body); text-align:center; color:#333; }
-  table.print-stats td b{ display:block; font-size:15px; font-family:var(--font-display); color:#111; margin-bottom:2px; }
+  .print-doc{ font-family:var(--font-display); color:#111; font-size:11px; }
+  .print-doc h1{ font-size:17px; margin:0 0 2px; }
+  .print-doc .meta{ font-size:9.5px; color:#555; font-family:var(--font-body); margin-bottom:10px; }
+  table.print-stats{ width:100%; border-collapse:collapse; margin-bottom:12px; table-layout:fixed; }
+  table.print-stats td{ border:1px solid #ccc; padding:5px 4px; font-size:9px; font-family:var(--font-body); text-align:center; color:#333; }
+  table.print-stats td b{ display:block; font-size:13px; font-family:var(--font-display); color:#111; margin-bottom:1px; }
   .print-section-title{
-    font-size:12.5px; font-weight:700; margin:20px 0 8px; text-transform:uppercase;
-    letter-spacing:0.06em; border-bottom:1px solid #999; padding-bottom:4px; font-family:var(--font-body);
+    font-size:10.5px; font-weight:700; margin:14px 0 6px; text-transform:uppercase;
+    letter-spacing:0.06em; border-bottom:1px solid #999; padding-bottom:3px; font-family:var(--font-body);
   }
-  .print-entry{ padding:9px 0; border-bottom:1px solid #ddd; break-inside:avoid; page-break-inside:avoid; }
+  .print-entry{ padding:6px 0; border-bottom:1px solid #e2e2e2; break-inside:avoid; page-break-inside:avoid; }
   .print-entry .row1{
-    display:flex; justify-content:space-between; font-size:10.5px; color:#444;
-    font-family:var(--font-body); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;
+    display:flex; justify-content:space-between; align-items:baseline; font-size:9px; color:#555;
+    font-family:var(--font-body); margin-bottom:2px;
   }
-  .print-entry .row1 .cat{ font-weight:700; }
-  .print-doc .md{ font-size:12.5px; line-height:1.5; font-family:var(--font-body); }
-  .print-doc .md p{ margin:0 0 6px; }
-  .print-doc .md ul{ margin:4px 0 6px 16px; padding:0; }
-  .print-doc .md h3,.print-doc .md h4,.print-doc .md h5{ font-size:12.5px; margin:6px 0 2px; font-family:var(--font-display); }
+  .print-entry .row1 .date{ font-family:var(--font-mono); letter-spacing:0; }
+  .print-entry .row1 .cat{ font-weight:700; text-transform:uppercase; letter-spacing:0.05em; text-align:right; }
+  .print-doc .md{ font-size:10.5px; line-height:1.4; font-family:var(--font-body); }
+  .print-doc .md p{ margin:0 0 4px; }
+  .print-doc .md ul{ margin:2px 0 4px 14px; padding:0; }
+  .print-doc .md h3,.print-doc .md h4,.print-doc .md h5{ font-size:10.5px; margin:4px 0 2px; font-family:var(--font-display); }
   .print-doc .md code{ font-family:var(--font-mono); background:#eee; padding:0 3px; }
-  .print-doctor-note{ font-size:10.5px; color:#555; font-family:var(--font-body); margin-top:2px; }
-  .print-gapnote{ font-size:10px; color:#888; font-style:italic; font-family:var(--font-body); margin-top:3px; }
-  .print-doctor{ font-size:11.5px; font-family:var(--font-body); margin-bottom:8px; line-height:1.4; }
-  .print-doctor b{ font-family:var(--font-display); font-size:13px; }
+  .print-doctor-note{ font-size:9px; color:#666; font-family:var(--font-body); margin-top:1px; }
+  .print-gapnote{ font-size:8.5px; color:#999; font-style:italic; font-family:var(--font-body); margin-top:2px; }
+  .print-doctor{ font-size:10px; font-family:var(--font-body); margin-bottom:6px; line-height:1.35; }
+  .print-doctor b{ font-family:var(--font-display); font-size:11.5px; }
 
   @media print{
+    html, body{ background:#fff !important; }
     body *{ visibility:hidden; }
     #printArea, #printArea *{ visibility:visible; }
-    #printArea{ display:block; position:absolute; left:0; top:0; width:100%; }
-    @page{ size:A4; margin:16mm 14mm; }
+    #printArea{ display:block; position:absolute; left:0; top:0; width:100%; background:#fff; }
+    @page{ size:A4; margin:14mm 12mm; }
   }
 </style>
 </head>
@@ -314,7 +318,10 @@
       <h1>Protokoll</h1>
       <span class="sub" id="headerSub">— </span>
     </div>
-    <button class="fab-top" id="addBtn" title="Eintrag erfassen" aria-label="Eintrag erfassen">+</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="fab-top" id="settingsBtn" title="Einstellungen" aria-label="Einstellungen" style="background:rgba(32,44,36,0.08); color:var(--ink); font-size:19px;">⚙</button>
+      <button class="fab-top" id="addBtn" title="Eintrag erfassen" aria-label="Eintrag erfassen">+</button>
+    </div>
   </header>
 
   <nav class="tabs">
@@ -326,7 +333,7 @@
   <main>
     <section id="view-dashboard" class="view active">
       <div class="stat-grid" id="statGrid"></div>
-      <h2 class="section-title">Letzte Einträge</h2>
+      <h2 class="section-title" id="dashTimelineTitle">Letzte Einträge</h2>
       <div id="dashTimeline"></div>
       <h2 class="section-title">Daten</h2>
       <div class="card">
@@ -411,6 +418,30 @@
   </form>
 </div>
 
+<div class="sheet" id="settingsSheet">
+  <div class="sheet-handle"></div>
+  <h2>Einstellungen</h2>
+  <div class="field-group">
+    <label>Einträge im Dashboard</label>
+    <div class="cat-select" id="dashLimitSelect">
+      <label data-val="5"><input type="radio" name="dashlimit" value="5"><span>Letzte 5</span></label>
+      <label data-val="10"><input type="radio" name="dashlimit" value="10"><span>Letzte 10</span></label>
+      <label data-val="all"><input type="radio" name="dashlimit" value="all"><span>Alle</span></label>
+    </div>
+    <div class="hint">Betrifft nur die Vorschau im Dashboard. Im Tab „Verlauf" siehst du ohnehin immer alle Einträge.</div>
+  </div>
+  <button type="button" class="btn primary block" id="settingsClose">Fertig</button>
+</div>
+
+<div class="sheet" id="icsSheet">
+  <div class="sheet-handle"></div>
+  <h2>Als Termin exportieren</h2>
+  <div id="icsPreview" style="border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px;"></div>
+  <button type="button" class="btn primary" id="icsOpenBtn">Im Kalender öffnen</button>
+  <button type="button" class="btn ghost block" id="icsCancel">Abbrechen</button>
+  <div class="hint">Öffnet eine ICS-Datei, die iOS als Kalendereintrag zum Übernehmen anbietet.</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div id="printArea"></div>
@@ -421,10 +452,12 @@
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
+  const STORE_SETTINGS = 'protokoll_settings_v1';
   const CAT_LABEL = {symptom:'Symptom', arztbesuch:'Arztbesuch', diagnostik:'Diagnostik'};
 
   let entries = load(STORE_ENTRIES, []);
   let doctors = load(STORE_DOCTORS, []);
+  let settings = load(STORE_SETTINGS, {dashLimit:'5'});
 
   function load(key, fallback){
     try{
@@ -434,6 +467,7 @@
   }
   function saveEntries(){ localStorage.setItem(STORE_ENTRIES, JSON.stringify(entries)); }
   function saveDoctors(){ localStorage.setItem(STORE_DOCTORS, JSON.stringify(doctors)); }
+  function saveSettings(){ localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings)); }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
   function todayStr(){ return new Date().toISOString().slice(0,10); }
 
@@ -494,6 +528,8 @@
   const backdrop = document.getElementById('backdrop');
   const entrySheet = document.getElementById('entrySheet');
   const doctorSheet = document.getElementById('doctorSheet');
+  const settingsSheet = document.getElementById('settingsSheet');
+  const icsSheet = document.getElementById('icsSheet');
 
   function openSheet(sheet){
     backdrop.classList.add('show');
@@ -503,10 +539,33 @@
     backdrop.classList.remove('show');
     entrySheet.classList.remove('show');
     doctorSheet.classList.remove('show');
+    settingsSheet.classList.remove('show');
+    icsSheet.classList.remove('show');
   }
   backdrop.addEventListener('click', closeSheets);
   document.getElementById('entryCancel').addEventListener('click', closeSheets);
   document.getElementById('doctorCancel').addEventListener('click', closeSheets);
+  document.getElementById('settingsClose').addEventListener('click', closeSheets);
+
+  /* ---------- Settings ---------- */
+  const dashLimitSelect = document.getElementById('dashLimitSelect');
+  document.getElementById('settingsBtn').addEventListener('click', ()=>{
+    dashLimitSelect.querySelectorAll('label').forEach(l=>{
+      const on = l.dataset.val === settings.dashLimit;
+      l.classList.toggle('checked', on);
+      l.querySelector('input').checked = on;
+    });
+    openSheet(settingsSheet);
+  });
+  dashLimitSelect.querySelectorAll('input[name=dashlimit]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      dashLimitSelect.querySelectorAll('label').forEach(l=>l.classList.remove('checked'));
+      inp.closest('label').classList.add('checked');
+      settings.dashLimit = inp.value;
+      saveSettings();
+      renderDashboard();
+    });
+  });
 
   /* ---------- Entry form ---------- */
   const catSelect = document.getElementById('catSelect');
@@ -602,6 +661,68 @@
     refreshAll();
   });
 
+  /* ---------- ICS / Kalender-Export ---------- */
+  let icsCurrentEntry = null;
+
+  function icsEscape(s){
+    return (s || '').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  }
+  function dateToIcs(iso){ return iso.replace(/-/g,''); }
+  function addDaysIso(iso, days){
+    const d = new Date(iso+'T00:00:00');
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0,10);
+  }
+  function buildIcs(entry){
+    const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
+    const firstLine = entry.text.split('\n')[0].replace(/[#*`_>-]/g,'').trim().slice(0,80);
+    const summary = `${CAT_LABEL[entry.category]}: ${firstLine || CAT_LABEL[entry.category]}`;
+    let description = entry.text;
+    if(doc) description += `\n\nArzt: ${doc.name}`;
+    const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+    const dtstart = dateToIcs(entry.date);
+    const dtend = dateToIcs(addDaysIso(entry.date, 1));
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Protokoll//DE',
+      'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      `UID:${entry.id}@protokoll.local`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${dtstart}`,
+      `DTEND;VALUE=DATE:${dtend}`,
+      `SUMMARY:${icsEscape(summary)}`,
+      `DESCRIPTION:${icsEscape(description)}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+  }
+
+  function openIcsSheet(id){
+    const entry = entries.find(x=>x.id===id);
+    if(!entry) return;
+    icsCurrentEntry = entry;
+    const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
+    const snippet = entry.text.replace(/[#*`_>-]/g,'').split('\n')[0].slice(0,120);
+    document.getElementById('icsPreview').innerHTML = `
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:5px;">
+        ${CAT_LABEL[entry.category]} · ${formatDate(entry.date)}
+      </div>
+      <div style="font-size:14px; color:var(--ink);">${escapeHtml(snippet)}</div>
+      ${doc ? `<div style="font-size:12.5px; color:var(--arzt); margin-top:8px;">👤 ${escapeHtml(doc.name)}</div>` : ''}
+    `;
+    openSheet(icsSheet);
+  }
+
+  document.getElementById('icsCancel').addEventListener('click', closeSheets);
+  document.getElementById('icsOpenBtn').addEventListener('click', ()=>{
+    if(!icsCurrentEntry) return;
+    const ics = buildIcs(icsCurrentEntry);
+    window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    closeSheets();
+  });
+
   /* ---------- Rendering: Timeline (shared by dashboard + list) ---------- */
   function buildTimelineHtml(list, collapsible){
     if(list.length === 0){
@@ -627,6 +748,7 @@
               <span class="date">${formatDate(entry.date)}</span>
               <div class="entry-snippet">${escapeHtml(snippet)}</div>
             </div>
+            ${collapsible ? `<button class="icon-btn" data-cal="${entry.id}" aria-label="Termin exportieren" title="Als Kalendertermin exportieren">📅</button>` : ''}
             ${collapsible ? '<span class="chevron">›</span>' : ''}
           </div>
           <div class="entry-body">
@@ -657,6 +779,12 @@
     container.querySelectorAll('[data-toggle]').forEach(head=>{
       head.addEventListener('click', ()=>{
         head.closest('.entry-card').classList.toggle('open');
+      });
+    });
+    container.querySelectorAll('[data-cal]').forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openIcsSheet(b.dataset.cal);
       });
     });
     container.querySelectorAll('[data-edit]').forEach(b=>{
@@ -717,9 +845,12 @@
       </div>
     `;
 
-    const recent = [...entries].sort((a,b)=> b.date.localeCompare(a.date)).slice(0,5);
+    const recent = [...entries].sort((a,b)=> b.date.localeCompare(a.date));
+    const limited = settings.dashLimit === 'all' ? recent : recent.slice(0, parseInt(settings.dashLimit,10));
+    document.getElementById('dashTimelineTitle').textContent =
+      settings.dashLimit === 'all' ? 'Alle Einträge' : `Letzte ${settings.dashLimit} Einträge`;
     const container = document.getElementById('dashTimeline');
-    container.innerHTML = buildTimelineHtml(recent, false);
+    container.innerHTML = buildTimelineHtml(limited, false);
     wireTimelineEvents(container);
   }
 
@@ -858,7 +989,7 @@
         }
         html += `
           <div class="print-entry">
-            <div class="row1"><span class="cat">${CAT_LABEL[entry.category]}</span><span>${formatDate(entry.date)}</span></div>
+            <div class="row1"><span class="date">${formatDate(entry.date)}</span><span class="cat">${CAT_LABEL[entry.category]}</span></div>
             <div class="md">${mdToHtml(entry.text)}</div>
             ${doc ? `<div class="print-doctor-note">Arzt: ${escapeHtml(doc.name)}</div>` : ''}
             ${gapNote}
