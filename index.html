@@ -207,6 +207,7 @@
   .doctor-card .name{ font-family:var(--font-display); font-size:16px; font-weight:600; }
   .doctor-card .field{ font-size:13px; color:var(--ink-soft); margin-top:4px; white-space:pre-wrap; }
   .doctor-card .field b{ color:var(--ink); font-weight:600; }
+  .tel-link{ color:var(--arzt); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
   .doctor-actions{ display:flex; gap:14px; margin-top:10px; }
   .doctor-actions button{ border:none; background:none; font-size:12.5px; font-weight:600; cursor:pointer; padding:0;}
   .doctor-actions .edit{ color:var(--accent); }
@@ -272,6 +273,10 @@
     transition:all .25s ease; max-width:85%; text-align:center;
   }
   .toast.show{ opacity:1; transform:translate(-50%,0); }
+  .app-version{
+    text-align:center; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);
+    margin:18px 0 6px; letter-spacing:0.02em;
+  }
 
   /* ---- Print view ---- */
   #printArea{ display:none; }
@@ -345,6 +350,7 @@
         <input type="file" id="importFile" accept="application/json">
         <div class="hint">Speichert alles lokal in diesem Browser. Export erzeugt eine JSON-Datei zum Sichern oder Übertragen. Die Druckansicht bereitet den gesamten Verlauf für A4 auf.</div>
       </div>
+      <div class="app-version" id="appVersionLine"></div>
     </section>
 
     <section id="view-list" class="view">
@@ -449,6 +455,10 @@
 <script>
 (function(){
   "use strict";
+
+  // Bump this together with CACHE_NAME in sw.js on every update, so the
+  // displayed version always matches what the service worker is serving.
+  const APP_VERSION = 6;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -739,6 +749,7 @@
     desc.forEach((entry, i)=>{
       const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
       const snippet = entry.text.replace(/[#*`_>-]/g,'').split('\n')[0].slice(0,80);
+      const showCal = collapsible || entry.category === 'arztbesuch' || entry.category === 'diagnostik';
       html += `<div class="tl-item">
         <span class="tl-node ${entry.category}"></span>
         <div class="entry-card" data-id="${entry.id}">
@@ -748,7 +759,7 @@
               <span class="date">${formatDate(entry.date)}</span>
               <div class="entry-snippet">${escapeHtml(snippet)}</div>
             </div>
-            ${collapsible ? `<button class="icon-btn" data-cal="${entry.id}" aria-label="Termin exportieren" title="Als Kalendertermin exportieren">📅</button>` : ''}
+            ${showCal ? `<button class="icon-btn" data-cal="${entry.id}" aria-label="Termin exportieren" title="Als Kalendertermin exportieren">📅</button>` : ''}
             ${collapsible ? '<span class="chevron">›</span>' : ''}
           </div>
           <div class="entry-body">
@@ -773,6 +784,9 @@
   function formatDate(iso){
     const d = new Date(iso+'T00:00:00');
     return d.toLocaleDateString('de-DE', {day:'2-digit', month:'short', year:'numeric'});
+  }
+  function telHref(phone){
+    return (phone || '').replace(/[^\d+]/g, '');
   }
 
   function wireTimelineEvents(container){
@@ -873,7 +887,7 @@
         <div class="name">${escapeHtml(d.name)}</div>
         ${d.address ? `<div class="field"><b>Adresse</b><br>${escapeHtml(d.address)}</div>` : ''}
         ${d.hours ? `<div class="field"><b>Öffnungszeiten</b><br>${escapeHtml(d.hours)}</div>` : ''}
-        ${d.phone ? `<div class="field"><b>Telefon</b> ${escapeHtml(d.phone)}</div>` : ''}
+        ${d.phone ? `<div class="field"><b>Telefon</b> <a href="tel:${telHref(d.phone)}" class="tel-link">${escapeHtml(d.phone)}</a></div>` : ''}
         <div class="doctor-actions">
           <button class="edit" data-dedit="${d.id}">Bearbeiten</button>
           <button class="del" data-ddel="${d.id}">Löschen</button>
@@ -1020,6 +1034,7 @@
   }
 
   refreshAll();
+  document.getElementById('appVersionLine').textContent = `Protokoll · v${APP_VERSION}`;
 
   if ('serviceWorker' in navigator){
     window.addEventListener('load', () => {
