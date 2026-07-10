@@ -452,9 +452,10 @@
   <div class="sheet-handle"></div>
   <h2>Als Termin exportieren</h2>
   <div id="icsPreview" style="border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px;"></div>
-  <button type="button" class="btn primary" id="icsOpenBtn">Im Kalender öffnen</button>
+  <button type="button" class="btn primary" id="icsOpenBtn">Termin teilen / speichern</button>
+  <button type="button" class="btn ghost block" id="icsGoogleBtn">In Google Kalender öffnen</button>
   <button type="button" class="btn ghost block" id="icsCancel">Abbrechen</button>
-  <div class="hint">Öffnet eine ICS-Datei, die iOS als Kalendereintrag zum Übernehmen anbietet.</div>
+  <div class="hint">Am iPhone öffnet „Teilen / speichern" die native Teilen-Ansicht, darüber lässt sich der Termin direkt zum Kalender hinzufügen. Klappt das nicht, wird stattdessen eine ICS-Datei gespeichert, die sich in der Dateien-App per Tipp öffnen und übernehmen lässt. Google Kalender funktioniert auf jedem Gerät, braucht aber einen Google-Account.</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -467,7 +468,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 7;
+  const APP_VERSION = 8;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -734,11 +735,68 @@
     openSheet(icsSheet);
   }
 
+  function isIOS(){
+    const ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function googleCalendarUrl(entry){
+    const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
+    const firstLine = entry.text.split('\n')[0].replace(/[#*`_>-]/g,'').trim().slice(0,80);
+    const title = `${CAT_LABEL[entry.category]}: ${firstLine || CAT_LABEL[entry.category]}`;
+    let details = entry.text;
+    if(doc) details += `\n\nArzt: ${doc.name}`;
+    const start = dateToIcs(entry.date);
+    const end = dateToIcs(addDaysIso(entry.date, 1));
+    const params = new URLSearchParams({ action:'TEMPLATE', text:title, dates:`${start}/${end}`, details });
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  }
+
+  async function shareOrDownloadIcs(entry){
+    const ics = buildIcs(entry);
+    const filename = `termin-${entry.date}.ics`;
+    const blob = new Blob([ics], {type:'text/calendar'});
+
+    // Bevorzugt: natives Teilen-Menü. Funktioniert auf aktuellem iOS Safari
+    // und Android Chrome zuverlässiger als ein data:-URI, besonders innerhalb
+    // einer installierten Homescreen-App ("standalone"), wo Safari eigene
+    // ICS-Handhabung stark einschränkt.
+    if(window.File && navigator.canShare){
+      try{
+        const file = new File([blob], filename, {type:'text/calendar'});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({files:[file], title:filename});
+          return;
+        }
+      }catch(err){
+        if(err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
+        // sonst: weiter zum Download-Fallback
+      }
+    }
+
+    // Fallback: echte Datei herunterladen
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    toast(isIOS()
+      ? 'ICS gespeichert – in „Dateien" öffnen und „Zum Kalender hinzufügen" wählen'
+      : 'ICS heruntergeladen – über die Downloads-Meldung im Kalender öffnen');
+  }
+
   document.getElementById('icsCancel').addEventListener('click', closeSheets);
   document.getElementById('icsOpenBtn').addEventListener('click', ()=>{
     if(!icsCurrentEntry) return;
-    const ics = buildIcs(icsCurrentEntry);
-    window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    shareOrDownloadIcs(icsCurrentEntry);
+    closeSheets();
+  });
+  document.getElementById('icsGoogleBtn').addEventListener('click', ()=>{
+    if(!icsCurrentEntry) return;
+    window.open(googleCalendarUrl(icsCurrentEntry), '_blank');
     closeSheets();
   });
 
