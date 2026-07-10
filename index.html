@@ -277,6 +277,12 @@
     text-align:center; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);
     margin:18px 0 6px; letter-spacing:0.02em;
   }
+  .update-btn{
+    border:none; background:none; color:var(--ink-faint); font-size:13px; cursor:pointer;
+    margin-left:4px; padding:2px 6px; vertical-align:middle; line-height:1; display:inline-block;
+  }
+  .update-btn.spinning{ animation:spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
   /* ---- Print view ---- */
   #printArea{ display:none; }
@@ -350,7 +356,10 @@
         <input type="file" id="importFile" accept="application/json">
         <div class="hint">Speichert alles lokal in diesem Browser. Export erzeugt eine JSON-Datei zum Sichern oder Übertragen. Die Druckansicht bereitet den gesamten Verlauf für A4 auf.</div>
       </div>
-      <div class="app-version" id="appVersionLine"></div>
+      <div class="app-version">
+        <span id="appVersionLine"></span>
+        <button type="button" id="checkUpdateBtn" class="update-btn" aria-label="Nach Update suchen" title="Nach Update suchen">⟳</button>
+      </div>
     </section>
 
     <section id="view-list" class="view">
@@ -458,7 +467,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 6;
+  const APP_VERSION = 7;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -1041,6 +1050,29 @@
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
     });
   }
+
+  document.getElementById('checkUpdateBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('checkUpdateBtn');
+    if(!('serviceWorker' in navigator)){ toast('Kein Service Worker verfügbar'); return; }
+    btn.classList.add('spinning');
+    try{
+      const reg = await navigator.serviceWorker.getRegistration();
+      if(!reg){ toast('Kein Service Worker registriert'); return; }
+      await reg.update();
+      if(reg.installing || reg.waiting){
+        toast('Update gefunden – wird geladen …');
+        navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+          window.location.reload();
+        }, {once:true});
+      } else {
+        toast('Du hast bereits die neueste Version');
+      }
+    }catch(e){
+      toast('Update-Check fehlgeschlagen');
+    }finally{
+      setTimeout(()=> btn.classList.remove('spinning'), 800);
+    }
+  });
 })();
 </script>
 </body>
