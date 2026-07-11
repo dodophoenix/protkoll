@@ -27,6 +27,8 @@
     --arzt-bg:#E4EAF3;
     --diag:#A9822F;
     --diag-bg:#F3ECDA;
+    --sonst:#6B5B95;
+    --sonst-bg:#E8E4F0;
     --free:#4C7A62;
     --danger:#B3402F;
     --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
@@ -121,12 +123,27 @@
   .dot.symptom{ background:var(--symptom); }
   .dot.arztbesuch{ background:var(--arzt); }
   .dot.diagnostik{ background:var(--diag); }
+  .dot.sonstiges{ background:var(--sonst); }
 
   h2.section-title{
     font-family:var(--font-display); font-size:15px; font-weight:600;
     color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.06em;
     margin:18px 2px 8px;
   }
+  .section-title-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    margin:18px 2px 8px;
+  }
+  .filter-badge, .filter-chip{
+    border:1.5px solid var(--line); background:var(--surface); color:var(--ink-faint);
+    border-radius:20px; padding:5px 11px; font-size:11px; font-weight:700; cursor:pointer;
+    letter-spacing:0.02em; white-space:nowrap; font-family:var(--font-body); text-transform:none;
+  }
+  .filter-badge.sonstiges.active, .filter-chip.sonstiges.active{ border-color:var(--sonst); background:var(--sonst-bg); color:var(--sonst); }
+  .filter-chip.symptom.active{ border-color:var(--symptom); background:var(--symptom-bg); color:var(--symptom); }
+  .filter-chip.arztbesuch.active{ border-color:var(--arzt); background:var(--arzt-bg); color:var(--arzt); }
+  .filter-chip.diagnostik.active{ border-color:var(--diag); background:var(--diag-bg); color:var(--diag); }
+  .filter-row{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
 
   /* ---- Timeline / protocol strip (signature element) ---- */
   .timeline{ position:relative; }
@@ -143,6 +160,7 @@
   .tl-node.symptom{ background:var(--symptom); }
   .tl-node.arztbesuch{ background:var(--arzt); }
   .tl-node.diagnostik{ background:var(--diag); }
+  .tl-node.sonstiges{ background:var(--sonst); }
 
   .entry-card{
     background:var(--surface); border-radius:var(--radius-sm);
@@ -160,6 +178,7 @@
   .badge.symptom{ background:var(--symptom-bg); color:var(--symptom); }
   .badge.arztbesuch{ background:var(--arzt-bg); color:var(--arzt); }
   .badge.diagnostik{ background:var(--diag-bg); color:var(--diag); }
+  .badge.sonstiges{ background:var(--sonst-bg); color:var(--sonst); }
   .entry-snippet{
     font-size:13.5px; color:var(--ink); margin-top:3px; white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis;
@@ -178,6 +197,32 @@
     margin-top:8px; font-size:12.5px; color:var(--arzt); background:var(--arzt-bg);
     padding:6px 10px; border-radius:8px; display:inline-block;
   }
+  .att-badge{ font-size:11px; color:var(--diag); font-family:var(--font-mono); margin-left:6px; }
+  .attachment-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .att-item{ display:flex; align-items:center; gap:6px; }
+  .att-item .attachment-chip{ flex:1; }
+  .att-inline-del{
+    border:none; background:none; color:var(--danger); font-size:16px; cursor:pointer;
+    padding:6px 6px; flex-shrink:0; line-height:1;
+  }
+  .attachment-chip{
+    display:flex; align-items:center; gap:6px; text-align:left; border:1.5px solid var(--line);
+    background:var(--bg); border-radius:9px; padding:8px 10px; font-size:12.5px; color:var(--ink);
+    cursor:pointer; width:100%; font-family:inherit;
+  }
+  .attachment-chip .att-size{ color:var(--ink-soft); font-size:11px; margin-left:auto; flex-shrink:0; }
+  .attachment-row{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border:1.5px solid var(--line);
+    border-radius:9px; margin-bottom:6px; font-size:12.5px; background:var(--bg);
+  }
+  .attachment-row .att-name{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .attachment-row .att-name-input{
+    flex:1; min-width:0; border:none; border-bottom:1.5px dashed var(--line); background:transparent;
+    font-size:12.5px; color:var(--ink); padding:2px 2px 3px; font-family:inherit;
+  }
+  .attachment-row .att-name-input:focus{ border-bottom-color:var(--accent); outline:none; }
+  .attachment-row .att-size{ color:var(--ink-soft); font-size:11px; flex-shrink:0; }
+  .att-remove{ border:none; background:none; color:var(--danger); font-size:16px; cursor:pointer; padding:0 2px; flex-shrink:0; }
   .entry-actions{ display:flex; gap:14px; margin-top:10px; }
   .entry-actions button{
     border:none; background:none; font-size:12.5px; font-weight:600; cursor:pointer; padding:4px 0;
@@ -250,16 +295,17 @@
   }
   .field-group textarea{ resize:vertical; min-height:90px; line-height:1.4; }
   .field-group select{ appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%); background-position: calc(100% - 18px) 21px, calc(100% - 13px) 21px; background-size:5px 5px, 5px 5px; background-repeat:no-repeat; }
-  .cat-select{ display:flex; gap:8px; }
+  .cat-select{ display:flex; gap:6px; flex-wrap:wrap; }
   .cat-select label{
-    flex:1; text-align:center; border:1.5px solid var(--line); border-radius:10px; padding:10px 4px;
-    font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); background:var(--bg);
+    flex:1 1 auto; min-width:72px; text-align:center; border:1.5px solid var(--line); border-radius:10px; padding:9px 3px;
+    font-size:11.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); background:var(--bg);
   }
   .cat-select input{ display:none; }
   .cat-select input:checked + span{ color:inherit; }
   .cat-select label.symptom.checked{ border-color:var(--symptom); background:var(--symptom-bg); color:var(--symptom); }
   .cat-select label.arztbesuch.checked{ border-color:var(--arzt); background:var(--arzt-bg); color:var(--arzt); }
   .cat-select label.diagnostik.checked{ border-color:var(--diag); background:var(--diag-bg); color:var(--diag); }
+  .cat-select label.sonstiges.checked{ border-color:var(--sonst); background:var(--sonst-bg); color:var(--sonst); }
   .cat-select label.checked{ border-color:var(--accent); background:rgba(47,107,94,0.08); color:var(--accent); }
   .hint{ font-size:11.5px; color:var(--ink-faint); margin-top:5px; }
 
@@ -310,6 +356,7 @@
   .print-doc .md code{ font-family:var(--font-mono); background:#eee; padding:0 3px; }
   .print-doctor-note{ font-size:9px; color:#666; font-family:var(--font-body); margin-top:1px; }
   .print-gapnote{ font-size:8.5px; color:#999; font-style:italic; font-family:var(--font-body); margin-top:2px; }
+  .print-attachments{ font-size:9px; color:#777; font-family:var(--font-body); margin-top:2px; }
   .print-doctor{ font-size:10px; font-family:var(--font-body); margin-bottom:6px; line-height:1.35; }
   .print-doctor b{ font-family:var(--font-display); font-size:11.5px; }
 
@@ -344,17 +391,15 @@
   <main>
     <section id="view-dashboard" class="view active">
       <div class="stat-grid" id="statGrid"></div>
-      <h2 class="section-title" id="dashTimelineTitle">Letzte Einträge</h2>
+      <div class="section-title-row">
+        <h2 class="section-title" id="dashTimelineTitle" style="margin:0;">Letzte Einträge</h2>
+        <button type="button" id="sonstigesToggle" class="filter-badge sonstiges">Sonstiges</button>
+      </div>
       <div id="dashTimeline"></div>
       <h2 class="section-title">Daten</h2>
       <div class="card">
-        <div class="backup-row">
-          <button class="btn ghost" id="exportBtn">Exportieren</button>
-          <button class="btn ghost" id="importBtn">Importieren</button>
-        </div>
-        <button class="btn primary block" id="printBtn">Für Arztbesuch drucken</button>
-        <input type="file" id="importFile" accept="application/json">
-        <div class="hint">Speichert alles lokal in diesem Browser. Export erzeugt eine JSON-Datei zum Sichern oder Übertragen. Die Druckansicht bereitet den gesamten Verlauf für A4 auf.</div>
+        <button class="btn primary block" id="printBtn" style="margin-top:0;">Für Arztbesuch drucken</button>
+        <div class="hint">Bereitet den gesamten Verlauf kompakt für A4 auf. Export, Import und Speicherort findest du in den Einstellungen (⚙ oben rechts).</div>
       </div>
       <div class="app-version">
         <span id="appVersionLine"></span>
@@ -363,6 +408,12 @@
     </section>
 
     <section id="view-list" class="view">
+      <div class="filter-row" id="verlaufFilterRow">
+        <button type="button" class="filter-chip symptom" data-filter="symptom">Symptom</button>
+        <button type="button" class="filter-chip arztbesuch" data-filter="arztbesuch">Arztbesuch</button>
+        <button type="button" class="filter-chip diagnostik" data-filter="diagnostik">Diagnostik</button>
+        <button type="button" class="filter-chip sonstiges" data-filter="sonstiges">Sonstiges</button>
+      </div>
       <div id="listContainer"></div>
     </section>
 
@@ -386,6 +437,7 @@
         <label class="symptom" data-cat="symptom"><input type="radio" name="cat" value="symptom"><span>Symptom</span></label>
         <label class="arztbesuch" data-cat="arztbesuch"><input type="radio" name="cat" value="arztbesuch"><span>Arztbesuch</span></label>
         <label class="diagnostik" data-cat="diagnostik"><input type="radio" name="cat" value="diagnostik"><span>Diagnostik</span></label>
+        <label class="sonstiges" data-cat="sonstiges"><input type="radio" name="cat" value="sonstiges"><span>Sonstiges</span></label>
       </div>
     </div>
     <div class="field-group">
@@ -397,6 +449,12 @@
       <select id="entryDoctor">
         <option value="">— kein Arzt ausgewählt —</option>
       </select>
+    </div>
+    <div class="field-group" id="attachmentFieldGroup" style="display:none;">
+      <label>Befunde (PDF)</label>
+      <div id="attachmentList"></div>
+      <button type="button" class="btn ghost block" id="addAttachmentBtn">+ PDF hinzufügen</button>
+      <input type="file" id="attachmentInput" accept="application/pdf" multiple style="display:none;">
     </div>
     <div class="field-group">
       <label for="entryText">Notiz (Markdown möglich)</label>
@@ -445,6 +503,15 @@
     </div>
     <div class="hint">Betrifft nur die Vorschau im Dashboard. Im Tab „Verlauf" siehst du ohnehin immer alle Einträge.</div>
   </div>
+  <div class="field-group">
+    <label>Daten</label>
+    <div class="backup-row">
+      <button type="button" class="btn ghost" id="exportBtn">Exportieren</button>
+      <button type="button" class="btn ghost" id="importBtn">Importieren</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json">
+    <div class="hint">Alles bleibt lokal in diesem Browser, inkl. angehängter PDFs. Export erzeugt eine JSON-Datei zum Sichern oder Übertragen auf ein anderes Gerät (Anhänge sind enthalten).</div>
+  </div>
   <button type="button" class="btn primary block" id="settingsClose">Fertig</button>
 </div>
 
@@ -455,7 +522,7 @@
   <button type="button" class="btn primary" id="icsOpenBtn">Termin teilen / speichern</button>
   <button type="button" class="btn ghost block" id="icsGoogleBtn">In Google Kalender öffnen</button>
   <button type="button" class="btn ghost block" id="icsCancel">Abbrechen</button>
-  <div class="hint">Am iPhone öffnet „Teilen / speichern" die native Teilen-Ansicht, darüber lässt sich der Termin direkt zum Kalender hinzufügen. Klappt das nicht, wird stattdessen eine ICS-Datei gespeichert, die sich in der Dateien-App per Tipp öffnen und übernehmen lässt. Google Kalender funktioniert auf jedem Gerät, braucht aber einen Google-Account.</div>
+  <div class="hint">Am iPhone im Teilen-Blatt „Mail" wählen (nicht „Dateien"), das braucht kein Google-Konto – jedes eingerichtete Mail-Konto reicht. Die ICS-Datei zeigt in Mail einen echten „Zum Kalender hinzufügen"-Knopf. Alternativ: Datei in „Dateien" sichern, dort antippen und mit dem Finger halten, dann zur Kalender-App wechseln und loslassen. Google Kalender ist nur eine zusätzliche Option und braucht einen Google-Account.</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -468,16 +535,16 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 9;
+  const APP_VERSION = 13;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
   const STORE_SETTINGS = 'protokoll_settings_v1';
-  const CAT_LABEL = {symptom:'Symptom', arztbesuch:'Arztbesuch', diagnostik:'Diagnostik'};
+  const CAT_LABEL = {symptom:'Symptom', arztbesuch:'Arztbesuch', diagnostik:'Diagnostik', sonstiges:'Sonstiges'};
 
   let entries = load(STORE_ENTRIES, []);
   let doctors = load(STORE_DOCTORS, []);
-  let settings = load(STORE_SETTINGS, {dashLimit:'5'});
+  let settings = load(STORE_SETTINGS, {dashLimit:'5', showSonstigesInDash:false});
 
   function load(key, fallback){
     try{
@@ -490,6 +557,80 @@
   function saveSettings(){ localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings)); }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
   function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  /* ---------- Anhänge (PDF) über IndexedDB ----------
+     LocalStorage hat in Safari ein hartes Limit von ca. 5 MB. PDFs von
+     Befunden würden das sofort sprengen und im schlimmsten Fall die ganze
+     App zum Absturz bringen. Deshalb: Nur die kleinen Metadaten (Name,
+     Größe, ID) liegen am Eintrag selbst in LocalStorage, die eigentlichen
+     PDF-Bytes liegen separat in IndexedDB, das ein deutlich größeres
+     Kontingent erlaubt. */
+  const FILES_DB = 'protokoll_files';
+  const FILES_STORE = 'files';
+  function openFilesDb(){
+    return new Promise((resolve, reject)=>{
+      const req = indexedDB.open(FILES_DB, 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore(FILES_STORE, {keyPath:'id'}); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function dbPutFile(record){
+    const db = await openFilesDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(FILES_STORE, 'readwrite');
+      tx.objectStore(FILES_STORE).put(record);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function dbGetFile(id){
+    const db = await openFilesDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(FILES_STORE, 'readonly');
+      const req = tx.objectStore(FILES_STORE).get(id);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function dbDeleteFile(id){
+    const db = await openFilesDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(FILES_STORE, 'readwrite');
+      tx.objectStore(FILES_STORE).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  function fileToBase64(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function base64ToBlob(base64, mime){
+    const byteChars = atob(base64);
+    const bytes = new Uint8Array(byteChars.length);
+    for(let i=0;i<byteChars.length;i++) bytes[i] = byteChars.charCodeAt(i);
+    return new Blob([bytes], {type: mime || 'application/pdf'});
+  }
+  function formatBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+    return (n/1024/1024).toFixed(1) + ' MB';
+  }
+  async function downloadAttachment(id){
+    const rec = await dbGetFile(id);
+    if(!rec){ toast('Datei nicht gefunden'); return; }
+    const blob = base64ToBlob(rec.data, rec.mime);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = rec.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+  }
 
   function escapeHtml(s){
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -587,6 +728,15 @@
     });
   });
 
+  const sonstigesToggle = document.getElementById('sonstigesToggle');
+  sonstigesToggle.classList.toggle('active', !!settings.showSonstigesInDash);
+  sonstigesToggle.addEventListener('click', ()=>{
+    settings.showSonstigesInDash = !settings.showSonstigesInDash;
+    sonstigesToggle.classList.toggle('active', settings.showSonstigesInDash);
+    saveSettings();
+    renderDashboard();
+  });
+
   /* ---------- Entry form ---------- */
   const catSelect = document.getElementById('catSelect');
   catSelect.querySelectorAll('input[name=cat]').forEach(inp=>{
@@ -594,6 +744,7 @@
       catSelect.querySelectorAll('label').forEach(l=>l.classList.remove('checked'));
       inp.closest('label').classList.add('checked');
       document.getElementById('doctorFieldGroup').style.display = inp.value === 'arztbesuch' ? 'block' : 'none';
+      document.getElementById('attachmentFieldGroup').style.display = inp.value === 'diagnostik' ? 'block' : 'none';
     });
   });
 
@@ -602,6 +753,62 @@
     sel.innerHTML = '<option value="">— kein Arzt ausgewählt —</option>' +
       doctors.map(d => `<option value="${d.id}" ${d.id===selectedId?'selected':''}>${escapeHtml(d.name)}</option>`).join('');
   }
+
+  /* --- Anhänge im Formular: pendingAttachments hält den Zustand, während
+     das Sheet offen ist; erst beim Speichern wird tatsächlich in
+     IndexedDB geschrieben bzw. gelöscht. --- */
+  let pendingAttachments = [];
+  let attachmentsToDelete = [];
+
+  function renderAttachmentList(){
+    const c = document.getElementById('attachmentList');
+    if(pendingAttachments.length === 0){
+      c.innerHTML = `<div class="hint">Noch keine Datei angehängt.</div>`;
+      return;
+    }
+    c.innerHTML = pendingAttachments.map((a,i) => `
+      <div class="attachment-row">
+        <span>📄</span>
+        <input type="text" class="att-name-input" value="${escapeHtml(a.name)}" data-rename-att="${i}" aria-label="Dateiname">
+        <span class="att-size">${formatBytes(a.size)}</span>
+        <button type="button" class="att-remove" data-remove-att="${i}" aria-label="Entfernen">✕</button>
+      </div>
+    `).join('');
+    c.querySelectorAll('[data-rename-att]').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const idx = parseInt(inp.dataset.renameAtt, 10);
+        const val = inp.value.trim();
+        if(pendingAttachments[idx] && val) pendingAttachments[idx].name = val;
+        else if(pendingAttachments[idx]) inp.value = pendingAttachments[idx].name;
+      });
+    });
+    c.querySelectorAll('[data-remove-att]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.dataset.removeAtt, 10);
+        const removed = pendingAttachments.splice(idx, 1)[0];
+        if(removed && removed._existing) attachmentsToDelete.push(removed.id);
+        renderAttachmentList();
+      });
+    });
+  }
+
+  document.getElementById('addAttachmentBtn').addEventListener('click', ()=>{
+    document.getElementById('attachmentInput').click();
+  });
+  document.getElementById('attachmentInput').addEventListener('change', async (e)=>{
+    const files = Array.from(e.target.files || []);
+    for(const file of files){
+      if(file.type !== 'application/pdf'){ toast(`${file.name}: nur PDF wird unterstützt`); continue; }
+      if(file.size > 20*1024*1024){ toast(`${file.name} ist größer als 20 MB`); continue; }
+      const base64 = await fileToBase64(file);
+      pendingAttachments.push({
+        id: uid(), name: file.name, size: file.size, mime: file.type,
+        _existing:false, _pendingData: base64
+      });
+    }
+    renderAttachmentList();
+    e.target.value = '';
+  });
 
   function openEntryForm(entry){
     document.getElementById('entrySheetTitle').textContent = entry ? 'Eintrag bearbeiten' : 'Eintrag erfassen';
@@ -616,12 +823,16 @@
       if(inp.checked) inp.closest('label').classList.add('checked');
     });
     document.getElementById('doctorFieldGroup').style.display = cat === 'arztbesuch' ? 'block' : 'none';
+    document.getElementById('attachmentFieldGroup').style.display = cat === 'diagnostik' ? 'block' : 'none';
+    pendingAttachments = (entry && entry.attachments) ? entry.attachments.map(a=>({...a, _existing:true})) : [];
+    attachmentsToDelete = [];
+    renderAttachmentList();
     openSheet(entrySheet);
   }
 
   document.getElementById('addBtn').addEventListener('click', ()=> openEntryForm(null));
 
-  document.getElementById('entryForm').addEventListener('submit', (e)=>{
+  document.getElementById('entryForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const id = document.getElementById('entryId').value;
     const cat = catSelect.querySelector('input[name=cat]:checked');
@@ -633,6 +844,33 @@
       text: document.getElementById('entryText').value.trim(),
       doctorId: cat.value === 'arztbesuch' ? (document.getElementById('entryDoctor').value || null) : null
     };
+    if(cat.value === 'diagnostik'){
+      try{
+        for(const attId of attachmentsToDelete){ await dbDeleteFile(attId); }
+        for(const a of pendingAttachments){
+          if(!a._existing){
+            await dbPutFile({id:a.id, name:a.name, size:a.size, mime:a.mime, data:a._pendingData});
+          } else {
+            // ggf. umbenannt: Datensatz in IndexedDB mit neuem Namen aktualisieren,
+            // ohne die PDF-Bytes erneut zu übertragen
+            const rec = await dbGetFile(a.id);
+            if(rec && rec.name !== a.name){
+              await dbPutFile({...rec, name:a.name});
+            }
+          }
+        }
+        data.attachments = pendingAttachments.map(a => ({id:a.id, name:a.name, size:a.size}));
+      }catch(err){
+        toast('Anhänge konnten nicht gespeichert werden');
+        return;
+      }
+    } else if(id){
+      // Kategorie wurde beim Bearbeiten von Diagnostik weg geändert: verwaiste Dateien aufräumen
+      const old = entries.find(x=>x.id===id);
+      if(old && old.attachments){
+        for(const a of old.attachments){ await dbDeleteFile(a.id); }
+      }
+    }
     if(id){
       const idx = entries.findIndex(x=>x.id===id);
       if(idx>-1) entries[idx] = data;
@@ -817,6 +1055,7 @@
       const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
       const snippet = entry.text.replace(/[#*`_>-]/g,'').split('\n')[0].slice(0,80);
       const showCal = collapsible || entry.category === 'arztbesuch' || entry.category === 'diagnostik';
+      const attCount = entry.attachments ? entry.attachments.length : 0;
       html += `<div class="tl-item">
         <span class="tl-node ${entry.category}"></span>
         <div class="entry-card" data-id="${entry.id}">
@@ -824,6 +1063,7 @@
             <div class="meta">
               <span class="badge ${entry.category}">${CAT_LABEL[entry.category]}</span>
               <span class="date">${formatDate(entry.date)}</span>
+              ${attCount ? `<span class="att-badge">📎 ${attCount}</span>` : ''}
               <div class="entry-snippet">${escapeHtml(snippet)}</div>
             </div>
             ${showCal ? `<button class="icon-btn" data-cal="${entry.id}" aria-label="Termin exportieren" title="Als Kalendertermin exportieren">📅</button>` : ''}
@@ -832,6 +1072,16 @@
           <div class="entry-body">
             <div class="md">${mdToHtml(entry.text)}</div>
             ${doc ? `<div class="entry-doctor-ref">👤 ${escapeHtml(doc.name)}</div>` : ''}
+            ${attCount ? `<div class="attachment-list">
+              ${entry.attachments.map(a => `
+                <div class="att-item">
+                  <button type="button" class="attachment-chip" data-download-att="${a.id}">
+                    📄 ${escapeHtml(a.name)} <span class="att-size">${formatBytes(a.size)}</span>
+                  </button>
+                  ${collapsible ? `<button type="button" class="att-inline-del" data-del-att="${a.id}" data-del-entry="${entry.id}" aria-label="Datei löschen">✕</button>` : ''}
+                </div>
+              `).join('')}
+            </div>` : ''}
             ${collapsible ? `<div class="entry-actions">
               <button class="edit" data-edit="${entry.id}">Bearbeiten</button>
               <button class="del" data-del="${entry.id}">Löschen</button>
@@ -862,6 +1112,28 @@
         head.closest('.entry-card').classList.toggle('open');
       });
     });
+    container.querySelectorAll('[data-download-att]').forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        downloadAttachment(b.dataset.downloadAtt);
+      });
+    });
+    container.querySelectorAll('[data-del-att]').forEach(b=>{
+      b.addEventListener('click', async (e)=>{
+        e.stopPropagation();
+        if(!confirm('Diese Datei wirklich löschen?')) return;
+        const attId = b.dataset.delAtt;
+        const entryId = b.dataset.delEntry;
+        await dbDeleteFile(attId);
+        const entry = entries.find(x=>x.id===entryId);
+        if(entry && entry.attachments){
+          entry.attachments = entry.attachments.filter(a=>a.id!==attId);
+        }
+        saveEntries();
+        toast('Datei gelöscht');
+        refreshAll();
+      });
+    });
     container.querySelectorAll('[data-cal]').forEach(b=>{
       b.addEventListener('click', (e)=>{
         e.stopPropagation();
@@ -876,9 +1148,13 @@
       });
     });
     container.querySelectorAll('[data-del]').forEach(b=>{
-      b.addEventListener('click', (e)=>{
+      b.addEventListener('click', async (e)=>{
         e.stopPropagation();
         if(confirm('Diesen Eintrag wirklich löschen?')){
+          const entry = entries.find(x=>x.id===b.dataset.del);
+          if(entry && entry.attachments){
+            for(const a of entry.attachments){ await dbDeleteFile(a.id); }
+          }
           entries = entries.filter(x=>x.id!==b.dataset.del);
           saveEntries();
           toast('Eintrag gelöscht');
@@ -899,7 +1175,7 @@
       }
       current = daysBetween(asc[asc.length-1].date, todayStr());
     }
-    const counts = {symptom:0, arztbesuch:0, diagnostik:0};
+    const counts = {symptom:0, arztbesuch:0, diagnostik:0, sonstiges:0};
     entries.forEach(e=> counts[e.category] = (counts[e.category]||0)+1);
 
     document.getElementById('headerSub').textContent = total > 0
@@ -922,11 +1198,13 @@
           <span class="item"><span class="dot symptom"></span>${counts.symptom} Symptom${counts.symptom===1?'':'e'}</span>
           <span class="item"><span class="dot arztbesuch"></span>${counts.arztbesuch} Arztbesuch${counts.arztbesuch===1?'':'e'}</span>
           <span class="item"><span class="dot diagnostik"></span>${counts.diagnostik} Diagnostik</span>
+          <span class="item"><span class="dot sonstiges"></span>${counts.sonstiges} Sonstiges</span>
         </div>
       </div>
     `;
 
-    const recent = [...entries].sort((a,b)=> b.date.localeCompare(a.date));
+    let recent = [...entries].sort((a,b)=> b.date.localeCompare(a.date));
+    if(!settings.showSonstigesInDash) recent = recent.filter(e => e.category !== 'sonstiges');
     const limited = settings.dashLimit === 'all' ? recent : recent.slice(0, parseInt(settings.dashLimit,10));
     document.getElementById('dashTimelineTitle').textContent =
       settings.dashLimit === 'all' ? 'Alle Einträge' : `Letzte ${settings.dashLimit} Einträge`;
@@ -936,9 +1214,29 @@
   }
 
   /* ---------- List ---------- */
+  let verlaufFilter = new Set();
+  document.querySelectorAll('#verlaufFilterRow [data-filter]').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const cat = chip.dataset.filter;
+      if(verlaufFilter.has(cat)){
+        verlaufFilter.delete(cat);
+        chip.classList.remove('active');
+      } else {
+        verlaufFilter.add(cat);
+        chip.classList.add('active');
+      }
+      renderList();
+    });
+  });
+
   function renderList(){
     const container = document.getElementById('listContainer');
-    container.innerHTML = buildTimelineHtml(entries, true);
+    const filtered = verlaufFilter.size === 0 ? entries : entries.filter(e => verlaufFilter.has(e.category));
+    if(filtered.length === 0 && entries.length > 0){
+      container.innerHTML = `<div class="empty"><div class="big">Keine Treffer</div><p>Für die gewählten Filter gibt es aktuell keine Einträge.</p></div>`;
+      return;
+    }
+    container.innerHTML = buildTimelineHtml(filtered, true);
     wireTimelineEvents(container);
   }
 
@@ -985,8 +1283,15 @@
   }
 
   /* ---------- Export / Import ---------- */
-  document.getElementById('exportBtn').addEventListener('click', ()=>{
-    const payload = { app:'protokoll', version:1, exportedAt:new Date().toISOString(), entries, doctors };
+  document.getElementById('exportBtn').addEventListener('click', async ()=>{
+    toast('Export wird erstellt …');
+    const attachmentIds = entries.flatMap(en => (en.attachments || []).map(a=>a.id));
+    const attachments = [];
+    for(const id of attachmentIds){
+      const rec = await dbGetFile(id);
+      if(rec) attachments.push(rec);
+    }
+    const payload = { app:'protokoll', version:2, exportedAt:new Date().toISOString(), entries, doctors, attachments };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -996,7 +1301,7 @@
     a.click();
     a.remove();
     setTimeout(()=> URL.revokeObjectURL(url), 2000);
-    toast('Export erstellt');
+    toast(`Export erstellt${attachments.length ? ` (inkl. ${attachments.length} Datei${attachments.length===1?'':'en'})` : ''}`);
   });
 
   document.getElementById('importBtn').addEventListener('click', ()=>{
@@ -1006,7 +1311,7 @@
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try{
         const data = JSON.parse(reader.result);
         if(!data || (!Array.isArray(data.entries) && !Array.isArray(data.doctors))){
@@ -1014,6 +1319,7 @@
         }
         const incomingEntries = Array.isArray(data.entries) ? data.entries : [];
         const incomingDoctors = Array.isArray(data.doctors) ? data.doctors : [];
+        const incomingAttachments = Array.isArray(data.attachments) ? data.attachments : [];
         incomingDoctors.forEach(d=>{
           const idx = doctors.findIndex(x=>x.id===d.id);
           if(idx>-1) doctors[idx] = d; else doctors.push(d);
@@ -1022,8 +1328,11 @@
           const idx = entries.findIndex(x=>x.id===en.id);
           if(idx>-1) entries[idx] = en; else entries.push(en);
         });
+        for(const rec of incomingAttachments){
+          await dbPutFile(rec);
+        }
         saveDoctors(); saveEntries();
-        toast(`Importiert: ${incomingEntries.length} Einträge, ${incomingDoctors.length} Ärzte`);
+        toast(`Importiert: ${incomingEntries.length} Einträge, ${incomingDoctors.length} Ärzte, ${incomingAttachments.length} Dateien`);
         refreshAll();
       }catch(err){
         toast('Datei konnte nicht gelesen werden');
@@ -1073,6 +1382,7 @@
             <div class="row1"><span class="date">${formatDate(entry.date)}</span><span class="cat">${CAT_LABEL[entry.category]}</span></div>
             <div class="md">${mdToHtml(entry.text)}</div>
             ${doc ? `<div class="print-doctor-note">Arzt: ${escapeHtml(doc.name)}</div>` : ''}
+            ${entry.attachments && entry.attachments.length ? `<div class="print-attachments">📎 ${entry.attachments.length} Datei${entry.attachments.length===1?'':'en'} angehängt (nicht ausgedruckt)</div>` : ''}
             ${gapNote}
           </div>`;
       });
