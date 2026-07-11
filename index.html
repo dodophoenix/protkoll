@@ -247,13 +247,31 @@
   /* ---- Doctors ---- */
   .doctor-card{
     background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow);
-    padding:14px; margin-bottom:10px;
+    padding:16px; margin-bottom:12px;
   }
-  .doctor-card .name{ font-family:var(--font-display); font-size:16px; font-weight:600; }
-  .doctor-card .field{ font-size:13px; color:var(--ink-soft); margin-top:4px; white-space:pre-wrap; }
-  .doctor-card .field b{ color:var(--ink); font-weight:600; }
+  .doctor-card-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .doctor-card .name{ font-family:var(--font-display); font-size:16.5px; font-weight:600; line-height:1.3; padding-top:2px; }
+  .tel-btn{
+    flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--arzt-bg); color:var(--arzt);
+    display:flex; align-items:center; justify-content:center; font-size:16px; text-decoration:none;
+  }
+  .tel-btn:active{ transform:scale(0.94); }
+  .doc-field{ display:flex; gap:10px; padding:9px 0; border-top:1px solid var(--line); }
+  .doc-field:first-of-type{ margin-top:10px; }
+  .doc-field-icon{ font-size:13px; width:18px; text-align:center; flex-shrink:0; margin-top:2px; }
+  .doc-field-label{
+    display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-faint); margin-bottom:2px;
+  }
+  .doc-field-value{ font-size:13.5px; color:var(--ink); white-space:pre-wrap; line-height:1.4; }
+  .doc-field-value.md{ white-space:normal; }
+  .doc-field-value.md p{ margin:0 0 5px; }
+  .doc-field-value.md p:last-child{ margin-bottom:0; }
+  .doc-field-value.md ul{ margin:2px 0 5px 16px; padding:0; }
+  .doc-field-value.md h3,.doc-field-value.md h4,.doc-field-value.md h5{ font-family:var(--font-display); margin:6px 0 2px; font-size:13.5px; }
+  .doc-field-value.md code{ background:var(--bg); padding:1px 5px; border-radius:4px; font-family:var(--font-mono); font-size:12.5px; }
   .tel-link{ color:var(--arzt); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
-  .doctor-actions{ display:flex; gap:14px; margin-top:10px; }
+  .doctor-actions{ display:flex; gap:14px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
   .doctor-actions button{ border:none; background:none; font-size:12.5px; font-weight:600; cursor:pointer; padding:0;}
   .doctor-actions .edit{ color:var(--accent); }
   .doctor-actions .del{ color:var(--danger); }
@@ -479,12 +497,16 @@
       <textarea id="doctorAddress" placeholder="Straße, PLZ Ort"></textarea>
     </div>
     <div class="field-group">
-      <label for="doctorHours">Öffnungszeiten</label>
+      <label for="doctorHours">Öffnungszeiten (Markdown möglich)</label>
       <textarea id="doctorHours" placeholder="Mo–Fr 8–12 Uhr …"></textarea>
     </div>
     <div class="field-group">
       <label for="doctorPhone">Telefon</label>
       <input type="tel" id="doctorPhone">
+    </div>
+    <div class="field-group">
+      <label for="doctorNotes">Bemerkung (Markdown möglich)</label>
+      <textarea id="doctorNotes" placeholder="z. B. Parkplätze, Anmeldeverfahren, Ansprechpartner …"></textarea>
     </div>
     <button type="submit" class="btn primary">Speichern</button>
     <button type="button" class="btn ghost block" id="doctorCancel">Abbrechen</button>
@@ -535,7 +557,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 13;
+  const APP_VERSION = 15;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -893,6 +915,7 @@
     document.getElementById('doctorAddress').value = doc ? doc.address : '';
     document.getElementById('doctorHours').value = doc ? doc.hours : '';
     document.getElementById('doctorPhone').value = doc ? doc.phone : '';
+    document.getElementById('doctorNotes').value = doc ? (doc.notes || '') : '';
     openSheet(doctorSheet);
   }
 
@@ -904,7 +927,8 @@
       name: document.getElementById('doctorName').value.trim(),
       address: document.getElementById('doctorAddress').value.trim(),
       hours: document.getElementById('doctorHours').value.trim(),
-      phone: document.getElementById('doctorPhone').value.trim()
+      phone: document.getElementById('doctorPhone').value.trim(),
+      notes: document.getElementById('doctorNotes').value.trim()
     };
     if(!data.name){ toast('Bitte einen Namen angeben'); return; }
     if(id){
@@ -1249,10 +1273,14 @@
     }
     container.innerHTML = doctors.map(d => `
       <div class="doctor-card" data-id="${d.id}">
-        <div class="name">${escapeHtml(d.name)}</div>
-        ${d.address ? `<div class="field"><b>Adresse</b><br>${escapeHtml(d.address)}</div>` : ''}
-        ${d.hours ? `<div class="field"><b>Öffnungszeiten</b><br>${escapeHtml(d.hours)}</div>` : ''}
-        ${d.phone ? `<div class="field"><b>Telefon</b> <a href="tel:${telHref(d.phone)}" class="tel-link">${escapeHtml(d.phone)}</a></div>` : ''}
+        <div class="doctor-card-head">
+          <div class="name">${escapeHtml(d.name)}</div>
+          ${d.phone ? `<a href="tel:${telHref(d.phone)}" class="tel-btn" aria-label="${escapeHtml(d.name)} anrufen" title="${escapeHtml(d.phone)}">📞</a>` : ''}
+        </div>
+        ${d.address ? `<div class="doc-field"><span class="doc-field-icon">📍</span><div><span class="doc-field-label">Adresse</span><div class="doc-field-value">${escapeHtml(d.address)}</div></div></div>` : ''}
+        ${d.hours ? `<div class="doc-field"><span class="doc-field-icon">🕒</span><div><span class="doc-field-label">Öffnungszeiten</span><div class="doc-field-value md">${mdToHtml(d.hours)}</div></div></div>` : ''}
+        ${d.phone ? `<div class="doc-field"><span class="doc-field-icon">📞</span><div><span class="doc-field-label">Telefon</span><div class="doc-field-value"><a href="tel:${telHref(d.phone)}" class="tel-link">${escapeHtml(d.phone)}</a></div></div></div>` : ''}
+        ${d.notes ? `<div class="doc-field"><span class="doc-field-icon">📝</span><div><span class="doc-field-label">Bemerkung</span><div class="doc-field-value md">${mdToHtml(d.notes)}</div></div></div>` : ''}
         <div class="doctor-actions">
           <button class="edit" data-dedit="${d.id}">Bearbeiten</button>
           <button class="del" data-ddel="${d.id}">Löschen</button>
@@ -1392,7 +1420,8 @@
       doctors.forEach(d=>{
         html += `<div class="print-doctor"><b>${escapeHtml(d.name)}</b>${d.phone ? ' · '+escapeHtml(d.phone) : ''}
           ${d.address ? '<br>'+escapeHtml(d.address) : ''}
-          ${d.hours ? '<br>'+escapeHtml(d.hours) : ''}</div>`;
+          ${d.hours ? `<div class="md">${mdToHtml(d.hours)}</div>` : ''}
+          ${d.notes ? `<div class="md">${mdToHtml(d.notes)}</div>` : ''}</div>`;
       });
     }
     html += `</div>`;

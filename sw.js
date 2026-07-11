@@ -1,7 +1,7 @@
 // Protokoll — Service Worker
 // Caches the app shell on install so it works fully offline after the first visit.
 // Bump CACHE_NAME whenever index.html changes so the new version gets picked up.
-const CACHE_NAME = 'protokoll-cache-v13';
+const CACHE_NAME = 'protokoll-cache-v15';
 const ASSETS = [
   './',
   './index.html',
