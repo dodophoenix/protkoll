@@ -478,8 +478,8 @@
         <option value="">— kein Arzt ausgewählt —</option>
       </select>
     </div>
-    <div class="field-group" id="attachmentFieldGroup" style="display:none;">
-      <label>Befunde (PDF)</label>
+    <div class="field-group" id="attachmentFieldGroup">
+      <label>Anhänge (PDF)</label>
       <div id="attachmentList"></div>
       <button type="button" class="btn ghost block" id="addAttachmentBtn">+ PDF hinzufügen</button>
       <input type="file" id="attachmentInput" accept="application/pdf" multiple style="display:none;">
@@ -575,7 +575,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 19;
+  const APP_VERSION = 20;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -810,7 +810,6 @@
       catSelect.querySelectorAll('label').forEach(l=>l.classList.remove('checked'));
       inp.closest('label').classList.add('checked');
       document.getElementById('doctorFieldGroup').style.display = inp.value === 'arztbesuch' ? 'block' : 'none';
-      document.getElementById('attachmentFieldGroup').style.display = inp.value === 'diagnostik' ? 'block' : 'none';
     });
   });
 
@@ -889,7 +888,6 @@
       if(inp.checked) inp.closest('label').classList.add('checked');
     });
     document.getElementById('doctorFieldGroup').style.display = cat === 'arztbesuch' ? 'block' : 'none';
-    document.getElementById('attachmentFieldGroup').style.display = cat === 'diagnostik' ? 'block' : 'none';
     pendingAttachments = (entry && entry.attachments) ? entry.attachments.map(a=>({...a, _existing:true})) : [];
     attachmentsToDelete = [];
     renderAttachmentList();
@@ -910,32 +908,24 @@
       text: document.getElementById('entryText').value.trim(),
       doctorId: cat.value === 'arztbesuch' ? (document.getElementById('entryDoctor').value || null) : null
     };
-    if(cat.value === 'diagnostik'){
-      try{
-        for(const attId of attachmentsToDelete){ await dbDeleteFile(attId); }
-        for(const a of pendingAttachments){
-          if(!a._existing){
-            await dbPutFile({id:a.id, name:a.name, size:a.size, mime:a.mime, data:a._pendingData});
-          } else {
-            // ggf. umbenannt: Datensatz in IndexedDB mit neuem Namen aktualisieren,
-            // ohne die PDF-Bytes erneut zu übertragen
-            const rec = await dbGetFile(a.id);
-            if(rec && rec.name !== a.name){
-              await dbPutFile({...rec, name:a.name});
-            }
+    try{
+      for(const attId of attachmentsToDelete){ await dbDeleteFile(attId); }
+      for(const a of pendingAttachments){
+        if(!a._existing){
+          await dbPutFile({id:a.id, name:a.name, size:a.size, mime:a.mime, data:a._pendingData});
+        } else {
+          // ggf. umbenannt: Datensatz in IndexedDB mit neuem Namen aktualisieren,
+          // ohne die PDF-Bytes erneut zu übertragen
+          const rec = await dbGetFile(a.id);
+          if(rec && rec.name !== a.name){
+            await dbPutFile({...rec, name:a.name});
           }
         }
-        data.attachments = pendingAttachments.map(a => ({id:a.id, name:a.name, size:a.size}));
-      }catch(err){
-        toast('Anhänge konnten nicht gespeichert werden');
-        return;
       }
-    } else if(id){
-      // Kategorie wurde beim Bearbeiten von Diagnostik weg geändert: verwaiste Dateien aufräumen
-      const old = entries.find(x=>x.id===id);
-      if(old && old.attachments){
-        for(const a of old.attachments){ await dbDeleteFile(a.id); }
-      }
+      data.attachments = pendingAttachments.map(a => ({id:a.id, name:a.name, size:a.size}));
+    }catch(err){
+      toast('Anhänge konnten nicht gespeichert werden');
+      return;
     }
     if(id){
       const idx = entries.findIndex(x=>x.id===id);
