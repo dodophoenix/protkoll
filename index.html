@@ -95,7 +95,7 @@
   }
   nav.tabs button{
     flex:1; border:none; background:transparent; color:var(--ink-soft);
-    padding:9px 6px; font-size:13.5px; font-weight:600; border-radius:9px;
+    padding:9px 4px; font-size:12.5px; font-weight:600; border-radius:9px;
     cursor:pointer;
   }
   nav.tabs button.active{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
@@ -205,6 +205,20 @@
     0%{ box-shadow:0 0 0 3px var(--arzt); }
     100%{ box-shadow:var(--shadow); }
   }
+  .entry-card.highlight{ animation:entryPulse 1.6s ease; }
+  @keyframes entryPulse{
+    0%{ box-shadow:0 0 0 3px var(--accent); }
+    100%{ box-shadow:var(--shadow); }
+  }
+  .file-row{
+    background:var(--surface); border-radius:var(--radius-sm); box-shadow:var(--shadow);
+    padding:12px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  .file-row-main{ display:flex; align-items:center; gap:8px; margin-bottom:9px; flex-wrap:wrap; }
+  .file-row-date{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); }
+  .file-row-doc{ font-size:11.5px; color:var(--arzt); margin-left:auto; }
+  .file-row-file{ display:flex; align-items:center; gap:6px; }
+  .file-row-file .attachment-chip{ flex:1; cursor:pointer; }
   .att-badge{ font-size:11px; color:var(--diag); font-family:var(--font-mono); margin-left:6px; }
   .attachment-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
   .att-item{ display:flex; align-items:center; gap:6px; }
@@ -359,34 +373,73 @@
 
   /* ---- Print view ---- */
   #printArea{ display:none; }
-  .print-doc{ font-family:var(--font-display); color:#111; font-size:11px; }
-  .print-doc h1{ font-size:17px; margin:0 0 2px; }
-  .print-doc .meta{ font-size:9.5px; color:#555; font-family:var(--font-body); margin-bottom:10px; }
-  table.print-stats{ width:100%; border-collapse:collapse; margin-bottom:12px; table-layout:fixed; }
-  table.print-stats td{ border:1px solid #ccc; padding:5px 4px; font-size:9px; font-family:var(--font-body); text-align:center; color:#333; }
-  table.print-stats td b{ display:block; font-size:13px; font-family:var(--font-display); color:#111; margin-bottom:1px; }
+  .print-doc{ font-family:var(--font-display); color:#1a1a1a; font-size:11px; }
+  .print-doc .print-header{ border-bottom:1.5px solid #1a1a1a; padding-bottom:8px; margin-bottom:14px; }
+  .print-doc h1{ font-size:19px; margin:0 0 2px; letter-spacing:0.01em; }
+  .print-doc .meta{ font-size:9.5px; color:#666; font-family:var(--font-body); }
+
+  .print-stats-row{
+    display:flex; border:1px solid #ccc; border-radius:8px; overflow:hidden; margin-bottom:16px;
+  }
+  .print-stats-row .stat-cell{
+    flex:1; text-align:center; padding:9px 4px; border-right:1px solid #ccc; background:#fafaf8;
+  }
+  .print-stats-row .stat-cell:last-child{ border-right:none; }
+  .print-stats-row .stat-cell b{ display:block; font-family:var(--font-display); font-size:15px; color:#111; margin-bottom:2px; }
+  .print-stats-row .stat-cell span{ font-size:8px; color:#666; font-family:var(--font-body); line-height:1.3; }
+
   .print-section-title{
-    font-size:10.5px; font-weight:700; margin:14px 0 6px; text-transform:uppercase;
+    font-size:10.5px; font-weight:700; margin:16px 0 8px; text-transform:uppercase;
     letter-spacing:0.06em; border-bottom:1px solid #999; padding-bottom:3px; font-family:var(--font-body);
+    color:#333;
   }
-  .print-entry{ padding:6px 0; border-bottom:1px solid #e2e2e2; break-inside:avoid; page-break-inside:avoid; }
+
+  .print-entry{
+    background:#fafaf8; border:1px solid #e0e0dc; border-left:3.5px solid #999;
+    border-radius:6px; padding:9px 11px; margin-bottom:7px;
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .print-entry.cat-symptom{ border-left-color:var(--symptom); }
+  .print-entry.cat-arztbesuch{ border-left-color:var(--arzt); }
+  .print-entry.cat-diagnostik{ border-left-color:var(--diag); }
+  .print-entry.cat-sonstiges{ border-left-color:var(--sonst); }
+
   .print-entry .row1{
-    display:flex; justify-content:space-between; align-items:baseline; font-size:9px; color:#555;
-    font-family:var(--font-body); margin-bottom:2px;
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;
   }
-  .print-entry .row1 .date{ font-family:var(--font-mono); letter-spacing:0; }
-  .print-entry .row1 .cat{ font-weight:700; text-transform:uppercase; letter-spacing:0.05em; text-align:right; }
-  .print-doc .md{ font-size:10.5px; line-height:1.4; font-family:var(--font-body); }
+  .print-entry .row1 .date{ font-family:var(--font-mono); font-size:9px; color:#555; letter-spacing:0; }
+  .print-cat-pill{
+    font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; font-family:var(--font-body);
+  }
+  .print-cat-pill.symptom{ background:var(--symptom-bg); color:var(--symptom); }
+  .print-cat-pill.arztbesuch{ background:var(--arzt-bg); color:var(--arzt); }
+  .print-cat-pill.diagnostik{ background:var(--diag-bg); color:var(--diag); }
+  .print-cat-pill.sonstiges{ background:var(--sonst-bg); color:var(--sonst); }
+
+  .print-gap{
+    text-align:center; font-family:var(--font-mono); font-size:8px; color:#999;
+    margin:0 0 7px; letter-spacing:0.03em; font-family:var(--font-body);
+  }
+  .print-gap.long{ color:var(--free); font-weight:600; }
+
+  .print-doc .md{ font-size:10.5px; line-height:1.45; font-family:var(--font-body); color:#222; }
   .print-doc .md p{ margin:0 0 4px; }
-  .print-doc .md ul{ margin:2px 0 4px 14px; padding:0; }
-  .print-doc .md h3,.print-doc .md h4,.print-doc .md h5{ font-size:10.5px; margin:4px 0 2px; font-family:var(--font-display); }
+  .print-doc .md p:last-child{ margin-bottom:0; }
+  .print-doc .md ul{ margin:3px 0 4px 15px; padding:0; }
+  .print-doc .md h3,.print-doc .md h4,.print-doc .md h5{ font-size:11px; font-weight:700; margin:5px 0 2px; font-family:var(--font-display); color:#111; }
   .print-doc .md code{ font-family:var(--font-mono); background:#eee; padding:0 3px; }
-  .print-doc .md a{ color:#111; }
-  .print-doctor-note{ font-size:9px; color:#666; font-family:var(--font-body); margin-top:1px; }
-  .print-gapnote{ font-size:8.5px; color:#999; font-style:italic; font-family:var(--font-body); margin-top:2px; }
-  .print-attachments{ font-size:9px; color:#777; font-family:var(--font-body); margin-top:2px; }
-  .print-doctor{ font-size:10px; font-family:var(--font-body); margin-bottom:6px; line-height:1.35; }
-  .print-doctor b{ font-family:var(--font-display); font-size:11.5px; }
+  .print-doc .md a{ color:#111; text-decoration:underline; }
+
+  .print-doctor-note{ font-size:9px; color:#666; font-family:var(--font-body); margin-top:5px; }
+  .print-attachments{ font-size:9px; color:#777; font-family:var(--font-body); margin-top:3px; }
+
+  .print-doctor{
+    background:#fafaf8; border:1px solid #e0e0dc; border-radius:6px;
+    padding:9px 11px; margin-bottom:7px; font-size:10px; font-family:var(--font-body); line-height:1.4;
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .print-doctor b{ font-family:var(--font-display); font-size:12px; color:#111; }
 
   @media print{
     html, body{ background:#fff !important; }
@@ -414,6 +467,7 @@
     <button data-tab="dashboard" class="active">Übersicht</button>
     <button data-tab="list">Verlauf</button>
     <button data-tab="doctors">Ärzte</button>
+    <button data-tab="files">Dateien</button>
   </nav>
 
   <main>
@@ -448,6 +502,10 @@
     <section id="view-doctors" class="view">
       <button class="btn primary block" id="addDoctorBtn">+ Arzt erfassen</button>
       <div id="doctorList" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="view-files" class="view">
+      <div id="filesContainer"></div>
     </section>
   </main>
 </div>
@@ -575,7 +633,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 20;
+  const APP_VERSION = 23;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -720,6 +778,7 @@
     if(name === 'dashboard') renderDashboard();
     if(name === 'list') renderList();
     if(name === 'doctors') renderDoctors();
+    if(name === 'files') renderFiles();
   }
   document.querySelectorAll('nav.tabs button').forEach(btn=>{
     btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
@@ -730,6 +789,20 @@
     requestAnimationFrame(()=>{
       const card = document.querySelector(`.doctor-card[data-id="${id}"]`);
       if(!card){ toast('Arzt nicht gefunden'); return; }
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      card.classList.add('highlight');
+      setTimeout(()=> card.classList.remove('highlight'), 1600);
+    });
+  }
+
+  function goToEntry(id){
+    verlaufFilter.clear();
+    document.querySelectorAll('#verlaufFilterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+    switchTab('list');
+    requestAnimationFrame(()=>{
+      const card = document.querySelector(`#listContainer .entry-card[data-id="${id}"]`);
+      if(!card){ toast('Eintrag nicht gefunden'); return; }
+      card.classList.add('open');
       card.scrollIntoView({behavior:'smooth', block:'center'});
       card.classList.add('highlight');
       setTimeout(()=> card.classList.remove('highlight'), 1600);
@@ -1356,6 +1429,46 @@
     });
   }
 
+  /* ---------- Dateien ---------- */
+  function renderFiles(){
+    const container = document.getElementById('filesContainer');
+    const rows = [];
+    entries.forEach(en=>{
+      (en.attachments || []).forEach(a=> rows.push({att:a, entry:en}));
+    });
+    if(rows.length === 0){
+      container.innerHTML = `<div class="empty"><div class="big">Noch keine Dateien</div><p>Hänge PDFs an einen Eintrag an — sie erscheinen dann hier gesammelt, sortiert nach dem Datum des jeweiligen Eintrags.</p></div>`;
+      return;
+    }
+    rows.sort((a,b)=> b.entry.date.localeCompare(a.entry.date) || 0);
+    container.innerHTML = rows.map(r => {
+      const en = r.entry, a = r.att;
+      const doc = en.doctorId ? doctors.find(d=>d.id===en.doctorId) : null;
+      return `
+        <div class="file-row" data-goto-entry="${en.id}">
+          <div class="file-row-main">
+            <span class="badge ${en.category}">${CAT_LABEL[en.category]}</span>
+            <span class="file-row-date">${formatDate(en.date)}</span>
+            ${doc ? `<span class="file-row-doc">👤 ${escapeHtml(doc.name)}</span>` : ''}
+          </div>
+          <div class="file-row-file">
+            <button type="button" class="attachment-chip" data-download-att="${a.id}">
+              📄 ${escapeHtml(a.name)} <span class="att-size">${formatBytes(a.size)}</span>
+            </button>
+            <button type="button" class="att-inline-del" data-del-att="${a.id}" data-del-entry="${en.id}" aria-label="Datei löschen">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    wireTimelineEvents(container);
+    container.querySelectorAll('[data-goto-entry]').forEach(row=>{
+      row.addEventListener('click', (e)=>{
+        if(e.target.closest('[data-download-att]') || e.target.closest('[data-del-att]')) return;
+        goToEntry(row.dataset.gotoEntry);
+      });
+    });
+  }
+
   /* ---------- Export / Import ---------- */
   document.getElementById('exportBtn').addEventListener('click', async ()=>{
     toast('Export wird erstellt …');
@@ -1370,7 +1483,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `protokoll-export-${todayStr()}.json`;
+    a.download = `protokoll-export.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -1420,7 +1533,7 @@
   function buildPrintDoc(){
     const asc = [...entries].sort((a,b)=> a.date.localeCompare(b.date) || 0);
     const total = asc.length;
-    const counts = {symptom:0, arztbesuch:0, diagnostik:0};
+    const counts = {symptom:0, arztbesuch:0, diagnostik:0, sonstiges:0};
     asc.forEach(e=> counts[e.category] = (counts[e.category]||0)+1);
     let longest = 0;
     for(let i=0;i<asc.length-1;i++) longest = Math.max(longest, daysBetween(asc[i].date, asc[i+1].date));
@@ -1428,17 +1541,17 @@
 
     let html = `
       <div class="print-doc">
-        <h1>Protokoll</h1>
-        <div class="meta">Erstellt am ${formatDate(todayStr())} · Zeitraum ${range} · ${total} Einträge</div>
-        <table class="print-stats">
-          <tr>
-            <td><b>${total}</b>Einträge gesamt</td>
-            <td><b>${counts.symptom}</b>Symptome</td>
-            <td><b>${counts.arztbesuch}</b>Arztbesuche</td>
-            <td><b>${counts.diagnostik}</b>Diagnostik</td>
-            <td><b>${longest}</b>Längste Phase ohne Eintrag (Tage)</td>
-          </tr>
-        </table>
+        <div class="print-header">
+          <h1>Protokoll</h1>
+          <div class="meta">Erstellt am ${formatDate(todayStr())} · Zeitraum ${range} · ${total} Einträge</div>
+        </div>
+        <div class="print-stats-row">
+          <div class="stat-cell"><b>${total}</b><span>Einträge gesamt</span></div>
+          <div class="stat-cell"><b>${counts.symptom}</b><span>Symptome</span></div>
+          <div class="stat-cell"><b>${counts.arztbesuch}</b><span>Arztbesuche</span></div>
+          <div class="stat-cell"><b>${counts.diagnostik}</b><span>Diagnostik</span></div>
+          <div class="stat-cell"><b>${longest}</b><span>Längste Phase ohne Eintrag (Tage)</span></div>
+        </div>
         <div class="print-section-title">Verlauf, chronologisch</div>
     `;
     if(asc.length === 0){
@@ -1446,18 +1559,19 @@
     } else {
       asc.forEach((entry, i)=>{
         const doc = entry.doctorId ? doctors.find(d=>d.id===entry.doctorId) : null;
-        let gapNote = '';
         if(i>0){
           const gap = daysBetween(asc[i-1].date, entry.date);
-          gapNote = `<div class="print-gapnote">${gap} ${gap===1?'Tag':'Tage'} seit vorherigem Eintrag</div>`;
+          html += `<div class="print-gap ${gap>=14?'long':''}">${gap} ${gap===1?'Tag':'Tage'} ohne Eintrag</div>`;
         }
         html += `
-          <div class="print-entry">
-            <div class="row1"><span class="date">${formatDate(entry.date)}</span><span class="cat">${CAT_LABEL[entry.category]}</span></div>
+          <div class="print-entry cat-${entry.category}">
+            <div class="row1">
+              <span class="date">${formatDate(entry.date)}</span>
+              <span class="print-cat-pill ${entry.category}">${CAT_LABEL[entry.category]}</span>
+            </div>
             <div class="md">${mdToHtml(entry.text)}</div>
             ${doc ? `<div class="print-doctor-note">Arzt: ${escapeHtml(doc.name)}</div>` : ''}
             ${entry.attachments && entry.attachments.length ? `<div class="print-attachments">📎 ${entry.attachments.length} Datei${entry.attachments.length===1?'':'en'} angehängt (nicht ausgedruckt)</div>` : ''}
-            ${gapNote}
           </div>`;
       });
     }
@@ -1483,6 +1597,7 @@
     renderDashboard();
     renderList();
     renderDoctors();
+    renderFiles();
   }
 
   refreshAll();
