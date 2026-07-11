@@ -197,6 +197,12 @@
   .entry-doctor-ref{
     margin-top:8px; font-size:12.5px; color:var(--arzt); background:var(--arzt-bg);
     padding:6px 10px; border-radius:8px; display:inline-block;
+    border:none; cursor:pointer; font-family:inherit;
+  }
+  .doctor-card.highlight{ animation:doctorPulse 1.6s ease; }
+  @keyframes doctorPulse{
+    0%{ box-shadow:0 0 0 3px var(--arzt); }
+    100%{ box-shadow:var(--shadow); }
   }
   .att-badge{ font-size:11px; color:var(--diag); font-family:var(--font-mono); margin-left:6px; }
   .attachment-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
@@ -568,7 +574,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 17;
+  const APP_VERSION = 18;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -707,17 +713,27 @@
   }
 
   /* ---------- Tabs ---------- */
+  function switchTab(name){
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('section.view').forEach(v=>v.classList.toggle('active', v.id === 'view-'+name));
+    if(name === 'dashboard') renderDashboard();
+    if(name === 'list') renderList();
+    if(name === 'doctors') renderDoctors();
+  }
   document.querySelectorAll('nav.tabs button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('section.view').forEach(v=>v.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('view-'+btn.dataset.tab).classList.add('active');
-      if(btn.dataset.tab === 'dashboard') renderDashboard();
-      if(btn.dataset.tab === 'list') renderList();
-      if(btn.dataset.tab === 'doctors') renderDoctors();
-    });
+    btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
   });
+
+  function goToDoctor(id){
+    switchTab('doctors');
+    requestAnimationFrame(()=>{
+      const card = document.querySelector(`.doctor-card[data-id="${id}"]`);
+      if(!card){ toast('Arzt nicht gefunden'); return; }
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      card.classList.add('highlight');
+      setTimeout(()=> card.classList.remove('highlight'), 1600);
+    });
+  }
 
   /* ---------- Sheets ---------- */
   const backdrop = document.getElementById('backdrop');
@@ -1122,7 +1138,7 @@
           </div>
           <div class="entry-body">
             <div class="md">${mdToHtml(entry.text)}</div>
-            ${doc ? `<div class="entry-doctor-ref">👤 ${escapeHtml(doc.name)}</div>` : ''}
+            ${doc ? `<button type="button" class="entry-doctor-ref" data-goto-doctor="${doc.id}">👤 ${escapeHtml(doc.name)}</button>` : ''}
             ${attCount ? `<div class="attachment-list">
               ${entry.attachments.map(a => `
                 <div class="att-item">
@@ -1167,6 +1183,12 @@
     container.querySelectorAll('[data-toggle]').forEach(head=>{
       head.addEventListener('click', ()=>{
         head.closest('.entry-card').classList.toggle('open');
+      });
+    });
+    container.querySelectorAll('[data-goto-doctor]').forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        goToDoctor(b.dataset.gotoDoctor);
       });
     });
     container.querySelectorAll('[data-download-att]').forEach(b=>{
