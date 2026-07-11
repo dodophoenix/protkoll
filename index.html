@@ -193,6 +193,7 @@
   .entry-body .md h3,.entry-body .md h4,.entry-body .md h5{ font-family:var(--font-display); margin:10px 0 4px; }
   .entry-body .md ul{ margin:4px 0 8px 18px; padding:0; }
   .entry-body .md code{ background:var(--bg); padding:1px 5px; border-radius:4px; font-family:var(--font-mono); font-size:13px;}
+  .md a{ color:var(--accent); text-decoration:underline; text-underline-offset:2px; }
   .entry-doctor-ref{
     margin-top:8px; font-size:12.5px; color:var(--arzt); background:var(--arzt-bg);
     padding:6px 10px; border-radius:8px; display:inline-block;
@@ -271,6 +272,7 @@
   .doc-field-value.md h3,.doc-field-value.md h4,.doc-field-value.md h5{ font-family:var(--font-display); margin:6px 0 2px; font-size:13.5px; }
   .doc-field-value.md code{ background:var(--bg); padding:1px 5px; border-radius:4px; font-family:var(--font-mono); font-size:12.5px; }
   .tel-link{ color:var(--arzt); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+  .map-link{ color:var(--arzt); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
   .doctor-actions{ display:flex; gap:14px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
   .doctor-actions button{ border:none; background:none; font-size:12.5px; font-weight:600; cursor:pointer; padding:0;}
   .doctor-actions .edit{ color:var(--accent); }
@@ -372,6 +374,7 @@
   .print-doc .md ul{ margin:2px 0 4px 14px; padding:0; }
   .print-doc .md h3,.print-doc .md h4,.print-doc .md h5{ font-size:10.5px; margin:4px 0 2px; font-family:var(--font-display); }
   .print-doc .md code{ font-family:var(--font-mono); background:#eee; padding:0 3px; }
+  .print-doc .md a{ color:#111; }
   .print-doctor-note{ font-size:9px; color:#666; font-family:var(--font-body); margin-top:1px; }
   .print-gapnote{ font-size:8.5px; color:#999; font-style:italic; font-family:var(--font-body); margin-top:2px; }
   .print-attachments{ font-size:9px; color:#777; font-family:var(--font-body); margin-top:2px; }
@@ -497,16 +500,16 @@
       <textarea id="doctorAddress" placeholder="Straße, PLZ Ort"></textarea>
     </div>
     <div class="field-group">
+      <label for="doctorNotes">Bemerkung (Markdown möglich)</label>
+      <textarea id="doctorNotes" placeholder="z. B. Parkplätze, Anmeldeverfahren, Ansprechpartner …"></textarea>
+    </div>
+    <div class="field-group">
       <label for="doctorHours">Öffnungszeiten (Markdown möglich)</label>
       <textarea id="doctorHours" placeholder="Mo–Fr 8–12 Uhr …"></textarea>
     </div>
     <div class="field-group">
       <label for="doctorPhone">Telefon</label>
       <input type="tel" id="doctorPhone">
-    </div>
-    <div class="field-group">
-      <label for="doctorNotes">Bemerkung (Markdown möglich)</label>
-      <textarea id="doctorNotes" placeholder="z. B. Parkplätze, Anmeldeverfahren, Ansprechpartner …"></textarea>
     </div>
     <button type="submit" class="btn primary">Speichern</button>
     <button type="button" class="btn ghost block" id="doctorCancel">Abbrechen</button>
@@ -524,6 +527,14 @@
       <label data-val="all"><input type="radio" name="dashlimit" value="all"><span>Alle</span></label>
     </div>
     <div class="hint">Betrifft nur die Vorschau im Dashboard. Im Tab „Verlauf" siehst du ohnehin immer alle Einträge.</div>
+  </div>
+  <div class="field-group">
+    <label>Navigation für Adressen</label>
+    <div class="cat-select" id="mapsProviderSelect">
+      <label data-val="apple"><input type="radio" name="mapsprovider" value="apple"><span>Apple Karten</span></label>
+      <label data-val="google"><input type="radio" name="mapsprovider" value="google"><span>Google Maps</span></label>
+    </div>
+    <div class="hint">Legt fest, welche App sich öffnet, wenn du bei einem Arzt auf die Adresse tippst.</div>
   </div>
   <div class="field-group">
     <label>Daten</label>
@@ -557,7 +568,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 15;
+  const APP_VERSION = 17;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -566,7 +577,7 @@
 
   let entries = load(STORE_ENTRIES, []);
   let doctors = load(STORE_DOCTORS, []);
-  let settings = load(STORE_SETTINGS, {dashLimit:'5', showSonstigesInDash:false});
+  let settings = load(STORE_SETTINGS, {dashLimit:'5', showSonstigesInDash:false, mapsProvider:'apple'});
 
   function load(key, fallback){
     try{
@@ -658,6 +669,7 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
   function inlineMd(s){
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|tel:[^\s)]+|mailto:[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
     s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
     s = s.replace(/(^|[^*])\*([^*]+?)\*/g,'$1<em>$2</em>');
     s = s.replace(/`(.+?)`/g,'<code>$1</code>');
@@ -732,9 +744,15 @@
 
   /* ---------- Settings ---------- */
   const dashLimitSelect = document.getElementById('dashLimitSelect');
+  const mapsProviderSelect = document.getElementById('mapsProviderSelect');
   document.getElementById('settingsBtn').addEventListener('click', ()=>{
     dashLimitSelect.querySelectorAll('label').forEach(l=>{
       const on = l.dataset.val === settings.dashLimit;
+      l.classList.toggle('checked', on);
+      l.querySelector('input').checked = on;
+    });
+    mapsProviderSelect.querySelectorAll('label').forEach(l=>{
+      const on = l.dataset.val === (settings.mapsProvider || 'apple');
       l.classList.toggle('checked', on);
       l.querySelector('input').checked = on;
     });
@@ -747,6 +765,15 @@
       settings.dashLimit = inp.value;
       saveSettings();
       renderDashboard();
+    });
+  });
+  mapsProviderSelect.querySelectorAll('input[name=mapsprovider]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      mapsProviderSelect.querySelectorAll('label').forEach(l=>l.classList.remove('checked'));
+      inp.closest('label').classList.add('checked');
+      settings.mapsProvider = inp.value;
+      saveSettings();
+      renderDoctors();
     });
   });
 
@@ -1129,6 +1156,12 @@
   function telHref(phone){
     return (phone || '').replace(/[^\d+]/g, '');
   }
+  function mapsUrl(address){
+    const q = encodeURIComponent(address);
+    return settings.mapsProvider === 'google'
+      ? `https://www.google.com/maps/search/?api=1&query=${q}`
+      : `https://maps.apple.com/?address=${q}`;
+  }
 
   function wireTimelineEvents(container){
     container.querySelectorAll('[data-toggle]').forEach(head=>{
@@ -1277,10 +1310,10 @@
           <div class="name">${escapeHtml(d.name)}</div>
           ${d.phone ? `<a href="tel:${telHref(d.phone)}" class="tel-btn" aria-label="${escapeHtml(d.name)} anrufen" title="${escapeHtml(d.phone)}">📞</a>` : ''}
         </div>
-        ${d.address ? `<div class="doc-field"><span class="doc-field-icon">📍</span><div><span class="doc-field-label">Adresse</span><div class="doc-field-value">${escapeHtml(d.address)}</div></div></div>` : ''}
+        ${d.address ? `<div class="doc-field"><span class="doc-field-icon">📍</span><div><span class="doc-field-label">Adresse</span><div class="doc-field-value"><a href="${mapsUrl(d.address)}" class="map-link" target="_blank" rel="noopener">${escapeHtml(d.address)}</a></div></div></div>` : ''}
+        ${d.notes ? `<div class="doc-field"><span class="doc-field-icon">📝</span><div><span class="doc-field-label">Bemerkung</span><div class="doc-field-value md">${mdToHtml(d.notes)}</div></div></div>` : ''}
         ${d.hours ? `<div class="doc-field"><span class="doc-field-icon">🕒</span><div><span class="doc-field-label">Öffnungszeiten</span><div class="doc-field-value md">${mdToHtml(d.hours)}</div></div></div>` : ''}
         ${d.phone ? `<div class="doc-field"><span class="doc-field-icon">📞</span><div><span class="doc-field-label">Telefon</span><div class="doc-field-value"><a href="tel:${telHref(d.phone)}" class="tel-link">${escapeHtml(d.phone)}</a></div></div></div>` : ''}
-        ${d.notes ? `<div class="doc-field"><span class="doc-field-icon">📝</span><div><span class="doc-field-label">Bemerkung</span><div class="doc-field-value md">${mdToHtml(d.notes)}</div></div></div>` : ''}
         <div class="doctor-actions">
           <button class="edit" data-dedit="${d.id}">Bearbeiten</button>
           <button class="del" data-ddel="${d.id}">Löschen</button>
