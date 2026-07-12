@@ -188,6 +188,9 @@
   .entry-card.open .chevron{ transform:rotate(90deg); }
   .entry-card.open .entry-snippet{ display:none; }
   .entry-body{ display:none; padding:0 14px 14px; }
+  .entry-relative-time{
+    text-align:right; font-size:11px; color:var(--ink-faint); margin-bottom:7px; font-family:var(--font-mono);
+  }
   .entry-card.open .entry-body{ display:block; }
   .entry-body .md{ font-size:14.5px; line-height:1.5; }
   .entry-body .md p{ margin:0 0 8px; }
@@ -633,7 +636,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 23;
+  const APP_VERSION = 24;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -1201,6 +1204,7 @@
             ${collapsible ? '<span class="chevron">›</span>' : ''}
           </div>
           <div class="entry-body">
+            <div class="entry-relative-time">${relativeTime(entry.date)}</div>
             <div class="md">${mdToHtml(entry.text)}</div>
             ${doc ? `<button type="button" class="entry-doctor-ref" data-goto-doctor="${doc.id}">👤 ${escapeHtml(doc.name)}</button>` : ''}
             ${attCount ? `<div class="attachment-list">
@@ -1232,6 +1236,24 @@
   function formatDate(iso){
     const d = new Date(iso+'T00:00:00');
     return d.toLocaleDateString('de-DE', {day:'2-digit', month:'short', year:'numeric'});
+  }
+  function relativeTime(dateStr){
+    const days = daysBetween(dateStr, todayStr());
+    if(days === 0) return 'heute';
+    if(days === 1) return 'gestern';
+    if(days < 30) return `vor ${days} Tagen`;
+    if(days < 60){
+      const remDays = days - 30;
+      return `vor 1 Monat${remDays > 0 ? ' ' + remDays + ' Tag' + (remDays===1?'':'en') : ''}`;
+    }
+    if(days < 365){
+      const rounded = Math.round((days/30) * 2) / 2;
+      const numStr = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1).replace('.', ',');
+      return `vor ${numStr} Monaten`;
+    }
+    const rounded = Math.round((days/365) * 2) / 2;
+    const numStr = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1).replace('.', ',');
+    return `vor ${numStr} Jahr${rounded === 1 ? '' : 'en'}`;
   }
   function telHref(phone){
     return (phone || '').replace(/[^\d+]/g, '');
