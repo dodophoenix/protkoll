@@ -446,9 +446,8 @@
 
   @media print{
     html, body{ background:#fff !important; }
-    body *{ visibility:hidden; }
-    #printArea, #printArea *{ visibility:visible; }
-    #printArea{ display:block; position:absolute; left:0; top:0; width:100%; background:#fff; }
+    #app{ display:none !important; }
+    #printArea{ display:block !important; background:#fff; }
     @page{ size:A4; margin:14mm 12mm; }
   }
 </style>
@@ -636,7 +635,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 24;
+  const APP_VERSION = 25;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -1601,9 +1600,7 @@
       html += `<div class="print-section-title">Ärzte</div>`;
       doctors.forEach(d=>{
         html += `<div class="print-doctor"><b>${escapeHtml(d.name)}</b>${d.phone ? ' · '+escapeHtml(d.phone) : ''}
-          ${d.address ? '<br>'+escapeHtml(d.address) : ''}
-          ${d.hours ? `<div class="md">${mdToHtml(d.hours)}</div>` : ''}
-          ${d.notes ? `<div class="md">${mdToHtml(d.notes)}</div>` : ''}</div>`;
+          ${d.address ? '<br>'+escapeHtml(d.address) : ''}</div>`;
       });
     }
     html += `</div>`;
