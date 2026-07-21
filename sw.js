@@ -1,7 +1,7 @@
 // Protokoll — Service Worker
 // Caches the app shell on install so it works fully offline after the first visit.
 // Bump CACHE_NAME whenever index.html changes so the new version gets picked up.
-const CACHE_NAME = 'protokoll-cache-v27';
+const CACHE_NAME = 'protokoll-cache-v25';
 const ASSETS = [
   './',
   './index.html',
@@ -27,10 +27,27 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Cache-first: serve from cache when available, fall back to network,
-// and only ever touch the network for same-origin requests.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Network-first für Navigations-Requests (= das eigentliche HTML-Dokument).
+  // Das bricht den Cache-Kreis: beim App-Start wird index.html immer frisch
+  // vom Server geholt, sodass eine neue Version sofort landet – auch in der
+  // Home-Screen-App. Offline fällt es auf den Cache zurück.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache-first für alle statischen Assets (Icons, Manifest …).
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;

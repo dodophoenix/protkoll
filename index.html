@@ -446,8 +446,9 @@
 
   @media print{
     html, body{ background:#fff !important; }
-    #app, #backdrop, #entrySheet, #doctorSheet, #settingsSheet, #icsSheet, #toast{ display:none !important; }
-    #printArea{ display:block !important; background:#fff; }
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; left:0; top:0; width:100%; background:#fff; }
     @page{ size:A4; margin:14mm 12mm; }
   }
 </style>
@@ -635,7 +636,7 @@
 
   // Bump this together with CACHE_NAME in sw.js on every update, so the
   // displayed version always matches what the service worker is serving.
-  const APP_VERSION = 27;
+  const APP_VERSION = 25;
 
   const STORE_ENTRIES = 'protokoll_entries_v1';
   const STORE_DOCTORS = 'protokoll_doctors_v1';
@@ -1600,7 +1601,9 @@
       html += `<div class="print-section-title">Ärzte</div>`;
       doctors.forEach(d=>{
         html += `<div class="print-doctor"><b>${escapeHtml(d.name)}</b>${d.phone ? ' · '+escapeHtml(d.phone) : ''}
-          ${d.address ? '<br>'+escapeHtml(d.address) : ''}</div>`;
+          ${d.address ? '<br>'+escapeHtml(d.address) : ''}
+          ${d.hours ? `<div class="md">${mdToHtml(d.hours)}</div>` : ''}
+          ${d.notes ? `<div class="md">${mdToHtml(d.notes)}</div>` : ''}</div>`;
       });
     }
     html += `</div>`;
@@ -1623,12 +1626,33 @@
   document.getElementById('appVersionLine').textContent = `Protokoll · v${APP_VERSION}`;
 
   if ('serviceWorker' in navigator){
-    window.addEventListener('load', () => {
-      // Safari hat einen bekannten Bug: registration.update() umgeht den
-      // HTTP-Cache für sw.js nicht zuverlässig. Fix: die Datei über eine
-      // versionierte Query-Zeichenkette registrieren, damit jede neue
-      // APP_VERSION als "andere" URL gilt und wirklich frisch geladen wird.
-      navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {updateViaCache:'none'}).catch(()=>{});
+    window.addEventListener('load', async () => {
+      // Safari-Bug: registration.update() umgeht den HTTP-Cache für sw.js nicht
+      // zuverlässig. Fix: versionierte URL → jede neue APP_VERSION = andere URL
+      // = echter Netzwerk-Abruf erzwungen.
+      const reg = await navigator.serviceWorker.register(
+        `./sw.js?v=${APP_VERSION}`, {updateViaCache:'none'}
+      ).catch(()=> null);
+
+      if (!reg) return;
+
+      // Globaler controllerchange-Listener: sobald ein neuer SW die Kontrolle
+      // übernimmt (skipWaiting + clients.claim), lädt die Seite sich neu.
+      // Das funktioniert automatisch – auch ohne Tipp auf den ⟳-Button.
+      // Das kleine Timeout schützt vor einem Reload beim allerersten Installieren.
+      let autoReload = false;
+      setTimeout(() => { autoReload = true; }, 1500);
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (autoReload) window.location.reload();
+      });
+
+      // Beim Start einmal im Hintergrund nach einem Update suchen.
+      // Kombiniert mit der network-first-Strategie des SW für index.html
+      // bedeutet das: sobald eine neue Version auf dem Server liegt, wird
+      // sie beim nächsten App-Start automatisch aktiv – kein Button nötig.
+      setTimeout(async () => {
+        try { await reg.update(); } catch(e) {}
+      }, 2000);
     });
   }
 
@@ -1640,11 +1664,11 @@
       const reg = await navigator.serviceWorker.getRegistration();
       if(!reg){ toast('Kein Service Worker registriert'); return; }
       await reg.update();
+      // Kurz warten, damit der Browser die Antwort verarbeiten kann
+      await new Promise(r => setTimeout(r, 400));
       if(reg.installing || reg.waiting){
         toast('Update gefunden – wird geladen …');
-        navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-          window.location.reload();
-        }, {once:true});
+        // Der globale controllerchange-Listener (s. o.) übernimmt den Reload.
       } else {
         toast('Du hast bereits die neueste Version');
       }
